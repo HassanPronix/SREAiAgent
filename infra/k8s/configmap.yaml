@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+
+metadata:
+  name: backend-config
+  namespace: aiops
+
+data:
+  NODE_ENV: "development"
+
+  KAFKA_BROKER: "host.docker.internal:9092"
+
+  PROMETHEUS_URL: "http://host.docker.internal:9090"
+
+  LOG_LEVEL: "info"

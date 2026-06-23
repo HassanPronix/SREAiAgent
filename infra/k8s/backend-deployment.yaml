@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: backend
+  namespace: aiops
+
+spec:
+
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: backend
+
+
+  template:
+
+    metadata:
+      labels:
+        app: backend
+
+
+    spec:
+
+      containers:
+
+      - name: backend
+
+        image: sre-aiops-backend:latest
+
+        imagePullPolicy: IfNotPresent
+
+
+        envFrom:
+
+        - configMapRef:
+            name: backend-config
+
+
+        - secretRef:
+            name: backend-secret
+
+
+        ports:
+
+        - containerPort: 3000

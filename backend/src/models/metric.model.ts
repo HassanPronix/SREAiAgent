@@ -2,17 +2,54 @@ import { Schema, model } from "mongoose";
 
 const MetricSchema = new Schema(
     {
-        metric: String,
+        timestamp: {
+            type: Date,
+            required: true
+        },
 
-        timestamp: Date,
+        source: {
+            type: String,
+            default: "prometheus"
+        },
 
-        data: Schema.Types.Mixed,
+        metricName: {
+            type: String,
+            required: true
+        },
+
+        pod: String,
+
+        namespace: String,
+
+        service: String,
+
+        container: String,
+
+        value: {
+            type: Number,
+            required: true
+        },
+
+        labels: {
+            type: Schema.Types.Mixed,
+            default: {}
+        },
+
+        metadata: {
+            type: Schema.Types.Mixed
+        }
     },
     {
-        timestamps: true,
+        timestamps: true
     }
 );
 
 MetricSchema.index({ timestamp: -1 });
+MetricSchema.index({ metricName: 1 });
+MetricSchema.index({ pod: 1 });
+MetricSchema.index({ service: 1 });
 
-export const MetricModel = model("Metric", MetricSchema);
+export const MetricModel = model(
+    "Metric",
+    MetricSchema
+);

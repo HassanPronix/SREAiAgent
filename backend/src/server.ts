@@ -5,6 +5,7 @@ import { connectDB } from "./config/database.js";
 import { startBackendLogConsumer } from "./consumers/backendLog.consumer.js";
 import { startRawLogConsumer }from "./consumers/rawLog.consumer.js";
 import { startMetricConsumer }from "./consumers/metric.consumer.ts";
+import { startMetricsCollector } from "./services/prometheus/metrics.scheduler.ts";
 
 
 const PORT = process.env.PORT || 5000;
@@ -18,7 +19,10 @@ async function bootstrap() {
 
     await startBackendLogConsumer();
     await startRawLogConsumer();
-    await startMetricConsumer();
+
+    // uncomment these two line for metrics 
+    // startMetricsCollector()    
+    // await startMetricConsumer();
 
     const server = app.listen(PORT, () => {
       logger.info(`Server running on ${PORT}`);

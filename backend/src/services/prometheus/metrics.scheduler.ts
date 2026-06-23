@@ -14,10 +14,11 @@ export function startMetricsCollector() {
 
             const cpuResults =
                 await prometheusService.query(
-                    "sum(rate(container_cpu_usage_seconds_total[5m])) by (pod)"
+                    "sum(rate(container_cpu_usage_seconds_total[5m])) by (name)" // change by (name) to by (pod) in k8s
                 );
 
 
+                console.log('cpu results -->', cpuResults)
             await producerService.publish(
                 TOPICS.METRICS,
                 {

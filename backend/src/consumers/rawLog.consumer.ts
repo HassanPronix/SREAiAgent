@@ -19,8 +19,7 @@ export async function startRawLogConsumer() {
     try {
       const payload = JSON.parse(message);
 
-      const normalized =
-        normalizeFluentBitLog(payload);
+      const normalized = normalizeFluentBitLog(payload);
 
       await logRepository.create(normalized);
 

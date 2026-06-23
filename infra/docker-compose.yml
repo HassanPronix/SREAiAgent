@@ -147,6 +147,22 @@ services:
     volumes:
       - grafana_data:/var/lib/grafana
 
+  # Comment this we dont need in prod environment because we will be using k8s
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.49.1
+    container_name: cadvisor
+
+    restart: unless-stopped
+
+    ports:
+      - "8082:8080"
+
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+
 volumes:
   mongo_data:
   qdrant_data:

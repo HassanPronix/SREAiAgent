@@ -4,6 +4,7 @@ import { MetricModel } from "../models/metric.model.js";
 import { normalizePrometheusMetric } from "../services/normalizers/prometheus.normalizer.js";
 import { detectAnomaly } from "../services/prometheus/anomaly.service.ts";
 import { producerService } from "../services/kafka/producer.service.ts";
+import { metricRepository } from "../repositories/metric.repository.ts";
 
 const consumer = new ConsumerService("metric-group");
 
@@ -23,7 +24,9 @@ export async function startMetricConsumer() {
 
     for (const metric of normalizedMetrics) {
 
-      await MetricModel.create({ ...metric, timestamp: payload.timestamp });
+      console.log('metric -->', metric)
+
+      await metricRepository.create({ ...metric, timestamp: payload.timestamp });
 
       const anomaly = detectAnomaly(metric);
 

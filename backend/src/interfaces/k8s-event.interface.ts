@@ -1,21 +1,21 @@
 export interface K8sEvent {
     timestamp: Date;
 
+    source: "kubernetes";
+
     cluster?: string;
 
     namespace?: string;
 
     kind?: string;
 
-    name?: string;
+    resourceName?: string;
 
     reason: string;
 
     message: string;
 
     type?: string;
-
-    source: "kubernetes";
 
     severity:
     | "INFO"

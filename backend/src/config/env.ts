@@ -7,8 +7,7 @@ export const env = {
 
   mongoUri: process.env.MONGO_URI!,
 
-  kafkaBrokers:
-    process.env.KAFKA_BROKERS?.split(",") || ["localhost:9092"],
+  kafkaBrokers: process.env.KAFKA_BROKERS?.split(",") || ["localhost:9092"],
 
   qdrantUrl: process.env.QDRANT_URL!,
 

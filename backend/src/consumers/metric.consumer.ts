@@ -1,10 +1,10 @@
 import { ConsumerService } from "../services/kafka/consumer.service.js";
 import { TOPICS } from "../services/kafka/topics.js";
-import { MetricModel } from "../models/metric.model.js";
+// import { MetricModel } from "../models/metric.model.js";
 import { normalizePrometheusMetric } from "../services/normalizers/prometheus.normalizer.js";
-import { detectAnomaly } from "../services/prometheus/anomaly.service.ts";
-import { producerService } from "../services/kafka/producer.service.ts";
-import { metricRepository } from "../repositories/metric.repository.ts";
+import { detectAnomaly } from "../services/prometheus/anomaly.service.js";
+import { producerService } from "../services/kafka/producer.service.js";
+import { metricRepository } from "../repositories/metric.repository.js";
 
 const consumer = new ConsumerService("metric-group");
 

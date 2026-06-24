@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: qdrant
+  namespace: devops-agent
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: qdrant
+
+  template:
+    metadata:
+      labels:
+        app: qdrant
+
+    spec:
+      containers:
+      - name: qdrant
+
+        image: qdrant/qdrant
+
+        ports:
+        - containerPort: 6333

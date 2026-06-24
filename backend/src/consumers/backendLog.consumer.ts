@@ -2,7 +2,7 @@ import { ConsumerService } from "../services/kafka/consumer.service.js";
 import { TOPICS } from "../services/kafka/topics.js";
 import { logger } from "../config/logger.js";
 import { logRepository } from "../repositories/log.repository.js";
-import { normalizeBackendLog } from '../services/normalizers/backend_normalizer.ts'
+import { normalizeBackendLog } from '../services/normalizers/backend_normalizer.js'
 
 const consumer = new ConsumerService(
     "backend-log-group"

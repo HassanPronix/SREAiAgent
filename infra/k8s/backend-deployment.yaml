@@ -3,45 +3,34 @@ kind: Deployment
 
 metadata:
   name: backend
-  namespace: aiops
+  namespace: devops-agent
 
 spec:
-
   replicas: 1
 
   selector:
     matchLabels:
       app: backend
 
-
   template:
-
     metadata:
       labels:
         app: backend
 
-
     spec:
-
       containers:
-
       - name: backend
 
-        image: sre-aiops-backend:latest
+        image: devops-agent:latest
 
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Never
 
+        ports:
+        - containerPort: 5000
 
         envFrom:
-
         - configMapRef:
             name: backend-config
 
-
         - secretRef:
             name: backend-secret
-
-
-        ports:
-
-        - containerPort: 3000

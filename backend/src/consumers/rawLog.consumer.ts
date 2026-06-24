@@ -2,7 +2,7 @@ import { ConsumerService } from "../services/kafka/consumer.service.js";
 import { TOPICS } from "../services/kafka/topics.js";
 import { logger } from "../config/logger.js";
 import { logRepository } from "../repositories/log.repository.js";
-import { normalizeFluentBitLog } from "../services/normalizers/fluentbit_normalizer.ts";
+import { normalizeFluentBitLog } from "../services/normalizers/fluentbit_normalizer.js";
 
 const consumer = new ConsumerService(
   "raw-log-group"

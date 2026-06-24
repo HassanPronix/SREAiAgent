@@ -1,4 +1,4 @@
-import { MetricModel } from "../models/metric.model.ts";
+import { MetricModel } from "../models/metric.model.js";
 
 class MetricRepository {
 

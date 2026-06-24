@@ -2,10 +2,10 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 
-import { requestContext } from "./middlewares/requestContext.ts";
-import { requestLogger } from "./middlewares/requestLogger.ts";
-import { errorHandler } from "./middlewares/errorHandler.ts";
-import { notFound } from "./middlewares/notFound.ts";
+import { requestContext } from "./middlewares/requestContext.js";
+import { requestLogger } from "./middlewares/requestLogger.js";
+import { errorHandler } from "./middlewares/errorHandler.js";
+import { notFound } from "./middlewares/notFound.js";
 
 const app = express();
 

@@ -11,7 +11,7 @@ data:
 
   NODE_ENV: "development"
 
-  KAFKA_BROKER: "kafka:9092"
+  KAFKA_BROKERS: "kafka:9092"
 
   PROMETHEUS_URL: "http://prometheus:9090"
 

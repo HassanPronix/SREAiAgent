@@ -6,8 +6,11 @@ metadata:
   namespace: devops-agent
 
 spec:
+  type: ClusterIP
+
   selector:
     app: prometheus
 
   ports:
-  - port: 9090
+    - port: 9090
+      targetPort: 9090

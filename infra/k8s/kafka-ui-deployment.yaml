@@ -35,3 +35,6 @@ spec:
 
         - name: DYNAMIC_CONFIG_ENABLED
           value: "true"
+          
+        - name: SERVER_SERVLET_CONTEXT_PATH
+          value: /kafka-ui

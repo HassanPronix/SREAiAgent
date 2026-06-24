@@ -6,11 +6,11 @@ metadata:
   namespace: devops-agent
 
 spec:
+  type: ClusterIP
+
   selector:
     app: backend
 
   ports:
-  - port: 5000
-    targetPort: 5000
-
-  type: ClusterIP
+    - port: 5000
+      targetPort: 5000

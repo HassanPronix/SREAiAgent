@@ -21,9 +21,9 @@ spec:
       containers:
       - name: backend
 
-        image: devops-agent:latest
+        image: devops-agent
 
-        imagePullPolicy: Never
+        imagePullPolicy: IfNotPresent
 
         ports:
         - containerPort: 5000

@@ -6,8 +6,10 @@ import { startBackendLogConsumer } from "./consumers/backendLog.consumer.js";
 import { startRawLogConsumer } from "./consumers/rawLog.consumer.js";
 import { startMetricConsumer } from "./consumers/metric.consumer.js";
 import { startMetricsCollector } from "./services/prometheus/metrics.scheduler.js";
-import { startK8sEventConsumer } from "./consumers/k8s-event.consumer.js";
-import { startEventWatcher } from "./services/kubernetes/event-watcher.service.js";
+import { startObservabilityConsumer } from "./consumers/startObservabilityConsumer.js";
+import { TOPICS } from "./services/kafka/topics.js";
+import { startIncidentScheduler } from "./services/incident/incident.scheduler.js";
+import { startWatchers } from "./services/kubernetes/watchers.service.js";
 
 
 const PORT = Number(process.env.PORT) || 5000;
@@ -23,11 +25,20 @@ async function bootstrap() {
     await startRawLogConsumer();
 
     // uncomment these two line for metrics 
-    startMetricsCollector()
-    await startMetricConsumer();
+    // startMetricsCollector()
+    // await startMetricConsumer();
 
-    await startK8sEventConsumer();
-    startEventWatcher();
+    // K8s event, deployment, pod watcher and consumer
+
+    // uncomment below code for k8s observability
+    // startWatchers()
+
+    // await startObservabilityConsumer(TOPICS.K8S_EVENTS, "k8s-event-group");
+    // await startObservabilityConsumer(TOPICS.POD_EVENTS, "pod-event-group");
+    // await startObservabilityConsumer(TOPICS.DEPLOYMENT_EVENTS, "deployment-event-group");
+    // await startObservabilityConsumer(TOPICS.NODE_EVENTS, "node-event-group");
+
+    startIncidentScheduler();   // scheduler for incidents
 
     const server = app.listen(PORT, "0.0.0.0", () => {
       logger.info(`Server running on ${PORT}`);

@@ -43,11 +43,3 @@ spec:
             name: backend
             port:
               number: 5000
-
-      - path: /mongodb
-        pathType: Prefix
-        backend:
-          service:
-            name: mongodb
-            port:
-              number: 27017

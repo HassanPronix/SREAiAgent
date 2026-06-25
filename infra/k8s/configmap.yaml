@@ -18,3 +18,5 @@ data:
   QDRANT_URL: "http://qdrant:6333"
 
   MONGO_URI: "mongodb://admin:admin123@mongodb:27017"
+
+  serviceName: 'api-service'

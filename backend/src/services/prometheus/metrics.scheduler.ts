@@ -12,13 +12,14 @@ export function startMetricsCollector() {
 
         try {
 
-            const cpuResults =
-                await prometheusService.query(
-                    "sum(rate(container_cpu_usage_seconds_total[5m])) by (name)" // change by (name) to by (pod) in k8s
-                );
+
+            // TODO: update this for memory and other metrics as well
+            const cpuResults = await prometheusService.query(
+                "sum(rate(container_cpu_usage_seconds_total[5m])) by (pod)" // "sum(rate(container_cpu_usage_seconds_total[5m])) by (name)" // change by (name) to by (pod) in k8s
+            );
 
 
-                console.log('cpu results -->', cpuResults)
+            // console.log('cpu results -->', cpuResults)
             await producerService.publish(
                 TOPICS.METRICS,
                 {
@@ -28,11 +29,7 @@ export function startMetricsCollector() {
                 }
             );
 
-
-            logger.info(
-                "Published raw CPU metrics"
-            );
-
+            logger.info("Published raw CPU metrics");
 
         } catch (error) {
 

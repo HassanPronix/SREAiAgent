@@ -45,5 +45,21 @@ export async function generateIncidents() {
 
             relatedEventIds: events.map(e => e._id),
         });
+
+        //TODO:  send email to SRE and also socket.io notificaiont to frontend with incident after sending incident, search similarity and if found generate recommendation and send to frontend
+        
     }
 }
+
+// const incident = await IncidentModel.findByIdAndUpdate(
+//     id,
+//     {
+//         status: "RESOLVED",
+//         rootCause,
+//         recommendation,
+//         resolvedAt: new Date()
+//     },
+//     { new: true }
+// );
+
+// await storeResolvedIncident(incident);

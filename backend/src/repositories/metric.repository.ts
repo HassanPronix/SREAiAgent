@@ -1,15 +1,13 @@
-import { MetricModel } from "../models/metric.model.js";
+import { MetricModel } from '../models/metric.model.js';
 
 class MetricRepository {
+  async create(metric: any) {
+    return MetricModel.create(metric);
+  }
 
-    async create(metric: any) {
-        return MetricModel.create(metric);
-    }
-
-    async findByMetric(metricName: string) {
-        return MetricModel.find({ metricName });
-    }
-
+  async findByMetric(metricName: string) {
+    return MetricModel.find({ metricName });
+  }
 }
 
-export const metricRepository = new MetricRepository()
+export const metricRepository = new MetricRepository();

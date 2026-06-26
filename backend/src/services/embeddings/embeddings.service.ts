@@ -1,5 +1,5 @@
-import { OpenAIEmbeddings } from "@langchain/openai";
+import { OpenAIEmbeddings } from '@langchain/openai';
 
 export const embeddings = new OpenAIEmbeddings({
-  model: "text-embedding-3-small",
+  model: 'text-embedding-3-small',
 });

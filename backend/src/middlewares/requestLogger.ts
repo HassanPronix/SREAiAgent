@@ -1,101 +1,58 @@
-import { Request, Response, NextFunction } from "express";
-import { logger } from "../config/logger.js";
+import { Request, Response, NextFunction } from 'express';
+import { logger } from '../config/logger.js';
 
+export const requestLogger = (req: Request, res: Response, next: NextFunction) => {
+  const start = Date.now();
 
-export const requestLogger = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-
-
-  const start =
-    Date.now();
-
-
-
-  res.on("finish", () => {
-
-
-    const duration =
-      Date.now() - start;
-
-
+  res.on('finish', () => {
+    const duration = Date.now() - start;
 
     const logPayload = {
+      event: 'http_request_completed',
 
-      event: "http_request_completed",
+      requestId: req.requestId,
 
-      requestId:
-        req.requestId,
-
-      traceId:
-        req.traceId,
-
+      traceId: req.traceId,
 
       metadata: {
+        method: req.method,
 
-        method:
-          req.method,
+        path: req.originalUrl,
 
-        path:
-          req.originalUrl,
+        statusCode: res.statusCode,
 
-        statusCode:
-          res.statusCode,
-
-        duration
-
-      }
-
+        duration,
+      },
     };
 
-
-
     if (res.statusCode >= 500) {
-
-
       logger.error(
         {
           ...logPayload,
 
-          event:
-            "http_request_failed"
+          event: 'http_request_failed',
         },
 
-        "HTTP request failed"
+        'HTTP request failed',
       );
-
-
     } else if (res.statusCode >= 400) {
-
-
       logger.warn(
         {
           ...logPayload,
 
-          event:
-            "http_request_warning"
+          event: 'http_request_warning',
         },
 
-        "HTTP request warning"
+        'HTTP request warning',
       );
-
-
     } else {
-
-
       logger.info(
         logPayload,
 
-        "HTTP request completed"
+        'HTTP request completed',
       );
-
     }
-
   });
-
-  
 
   next();
 };

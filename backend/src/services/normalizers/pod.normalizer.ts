@@ -1,35 +1,31 @@
-import { PodEvent } from "../../interfaces/pod-event.interface.js";
+import { PodEvent } from '../../interfaces/pod-event.interface.js';
 
 export function normalizePod(phase: string, pod: any): PodEvent {
-    const status = pod.status?.containerStatuses?.[0];
+  const status = pod.status?.containerStatuses?.[0];
 
-    return {
+  return {
+    timestamp: new Date(),
 
-        timestamp: new Date(),
+    source: 'kubernetes',
 
-        source: "kubernetes",
+    namespace: pod.metadata?.namespace,
 
-        namespace: pod.metadata?.namespace,
+    podName: pod.metadata?.name,
 
-        podName: pod.metadata?.name,
+    nodeName: pod.spec?.nodeName,
 
-        nodeName: pod.spec?.nodeName,
+    phase,
 
-        phase,
+    restartCount: status?.restartCount || 0,
 
-        restartCount:
-            status?.restartCount || 0,
+    ready: status?.ready || false,
 
-        ready:
-            status?.ready || false,
+    podIP: pod.status?.podIP,
 
-        podIP: pod.status?.podIP,
+    hostIP: pod.status?.hostIP,
 
-        hostIP: pod.status?.hostIP,
+    status: pod.status?.phase,
 
-        status:
-            pod.status?.phase,
-
-        metadata: pod
-    };
+    metadata: pod,
+  };
 }

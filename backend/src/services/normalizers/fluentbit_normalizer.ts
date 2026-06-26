@@ -1,18 +1,14 @@
-import { LogEvent } from "../../interfaces/log-event.interface.js";
+import { LogEvent } from '../../interfaces/log-event.interface.js';
 
-export function normalizeFluentBitLog(
-  payload: any
-): LogEvent {
+export function normalizeFluentBitLog(payload: any): LogEvent {
   return {
-    timestamp: payload.timestamp
-      ? new Date(payload.timestamp)
-      : new Date(),
+    timestamp: payload.timestamp ? new Date(payload.timestamp) : new Date(),
 
-    source: "fluentbit",
+    source: 'fluentbit',
 
-    severity: "INFO",
+    severity: 'INFO',
 
-    message: payload.log || "Unknown log",
+    message: payload.log || 'Unknown log',
 
     metadata: payload,
   };

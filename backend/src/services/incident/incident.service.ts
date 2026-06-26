@@ -1,318 +1,187 @@
-import { logger } from "../../config/logger.js";
-import incidentModel from "../../models/incident.model.js";
-import crypto from "crypto";
-import { SimilarityService } from "../qdrant/similarity.service.js";
-import { RCAService } from "../llm/rca.service.js";
+import { logger } from '../../config/logger.js';
+import incidentModel from '../../models/incident.model.js';
+import crypto from 'crypto';
+import { SimilarityService } from '../qdrant/similarity.service.js';
+import { RCAService } from '../llm/rca.service.js';
 
 export class IncidentService {
+  static async processEvent(topic: string, payload: any) {
+    try {
+      let isIncident = true;
 
-    static async processEvent(
-        topic: string,
-        payload: any
-    ) {
+      switch (topic) {
+        case 'backend-logs':
+          if (payload.level === 'error' || payload.level === 'fatal') {
+            isIncident = true;
+          }
 
-        try {
+          break;
 
-            let isIncident = false;
+        case 'metric-anomalies':
+          if (payload.severity === 'CRITICAL') {
+            isIncident = true;
+          }
 
+          break;
 
-            switch (topic) {
+        case 'pod-events':
+          if (['CrashLoopBackOff', 'OOMKilled', 'FailedScheduling'].includes(payload.reason)) {
+            isIncident = true;
+          }
 
+          break;
 
-                case "backend-logs":
+        case 'node-events':
+          if (['NodeNotReady', 'MemoryPressure', 'DiskPressure'].includes(payload.reason)) {
+            isIncident = true;
+          }
 
-                    if (
-                        payload.level === "error" ||
-                        payload.level === "fatal"
-                    ) {
-                        isIncident = true;
-                    }
+          break;
 
-                    break;
+        case 'deployment-events':
+          if (payload.status === 'FAILED') {
+            isIncident = true;
+          }
 
+          break;
+      }
 
-                case "metric-anomalies":
+      if (!isIncident) {
+        logger.debug(
+          {
+            event: 'incident_event_ignored',
 
-                    if (
-                        payload.severity === "CRITICAL"
-                    ) {
-                        isIncident = true;
-                    }
+            metadata: {
+              topic,
 
-                    break;
+              reason: payload.reason || payload.level || 'unknown',
+            },
+          },
 
+          'Event ignored, not an incident',
+        );
 
-                case "pod-events":
+        return;
+      }
 
-                    if ([
-                        "CrashLoopBackOff",
-                        "OOMKilled",
-                        "FailedScheduling",
-                    ].includes(payload.reason)) {
+      const incident = {
+        incidentId: crypto.randomUUID(),
 
-                        isIncident = true;
-                    }
+        title: `${topic} incident`,
 
-                    break;
+        severity: 'CRITICAL' as const,
 
+        status: 'OPEN' as const,
 
-                case "node-events":
+        source: topic,
 
-                    if ([
-                        "NodeNotReady",
-                        "MemoryPressure",
-                        "DiskPressure",
-                    ].includes(payload.reason)) {
+        resourceName:
+          payload.resourceName || payload.pod || payload.node || payload.deployment || '',
 
-                        isIncident = true;
-                    }
+        namespace: payload.namespace || '',
 
-                    break;
+        message: payload.message || payload.reason || payload.error || '',
 
+        occurredAt: payload.timestamp ? new Date(payload.timestamp) : new Date(),
 
-                case "deployment-events":
+        rawEvent: payload,
 
-                    if (
-                        payload.status === "FAILED"
-                    ) {
-                        isIncident = true;
-                    }
+        aiAnalysis: null,
+      };
 
-                    break;
-            }
+      logger.warn(
+        {
+          event: 'incident_detected',
 
+          metadata: {
+            incidentId: incident.incidentId,
 
+            topic,
 
-            if (!isIncident) {
+            resource: incident.resourceName,
 
+            namespace: incident.namespace,
+          },
+        },
 
-                logger.debug(
-                    {
-                        event: "incident_event_ignored",
+        'Incident detected',
+      );
 
-                        metadata: {
-                            topic,
+      const similarIncidents = await SimilarityService.findSimilarIncidents(payload);
 
-                            reason:
-                                payload.reason ||
-                                payload.level ||
-                                "unknown"
-                        }
-                    },
+      logger.info(
+        {
+          event: 'similar_incidents_search_completed',
 
-                    "Event ignored, not an incident"
-                );
+          metadata: {
+            incidentId: incident.incidentId,
 
+            similarCount: similarIncidents.length,
+          },
+        },
 
-                return;
-            }
+        'Similar incidents search completed',
+      );
 
+      const analysis = await RCAService.analyze(incident, similarIncidents);
 
+      logger.info(
+        {
+          event: 'rca_analysis_completed',
 
-            const incident = {
+          metadata: {
+            incidentId: incident.incidentId,
 
+            confidence: analysis.confidence,
 
-                incidentId:
-                    crypto.randomUUID(),
+            rootCause: analysis.rootCause,
+          },
+        },
 
+        'RCA analysis completed',
+      );
 
-                title:
-                    `${topic} incident`,
+      const enrichedIncident = {
+        ...incident,
 
+        aiAnalysis: analysis,
 
-                severity:
-                    "CRITICAL" as const,
+        similarIncidents,
+      };
 
+      await incidentModel.create(enrichedIncident);
 
-                status:
-                    "OPEN" as const,
+      logger.info(
+        {
+          event: 'incident_stored',
 
+          metadata: {
+            incidentId: incident.incidentId,
+          },
+        },
 
-                source:
-                    topic,
+        'Incident stored successfully',
+      );
+    } catch (error) {
+      logger.error(
+        {
+          event: 'incident_processing_failed',
 
+          err: error,
 
-                resourceName:
-                    payload.resourceName ||
-                    payload.pod ||
-                    payload.node ||
-                    payload.deployment ||
-                    "",
+          metadata: {
+            component: 'incident-processing',
 
+            incidentType: 'INCIDENT_PROCESSING_FAILURE',
 
-                namespace:
-                    payload.namespace || "",
+            topic,
+          },
+        },
 
+        'Failed to process incident',
+      );
 
-                message:
-                    payload.message ||
-                    payload.reason ||
-                    payload.error ||
-                    "",
-
-
-                occurredAt:
-                    payload.timestamp
-                        ? new Date(payload.timestamp)
-                        : new Date(),
-
-
-                rawEvent:
-                    payload,
-
-
-                aiAnalysis:
-                    null,
-
-            };
-
-
-
-            logger.warn(
-                {
-                    event: "incident_detected",
-
-                    metadata: {
-
-                        incidentId:
-                            incident.incidentId,
-
-                        topic,
-
-                        resource:
-                            incident.resourceName,
-
-                        namespace:
-                            incident.namespace
-                    }
-                },
-
-                "Incident detected"
-            );
-
-
-
-            const similarIncidents =
-                await SimilarityService.findSimilarIncidents(
-                    payload
-                );
-
-
-
-            logger.info(
-                {
-                    event: "similar_incidents_search_completed",
-
-                    metadata: {
-
-                        incidentId:
-                            incident.incidentId,
-
-                        similarCount:
-                            similarIncidents.length
-                    }
-                },
-
-                "Similar incidents search completed"
-            );
-
-
-
-            const analysis =
-                await RCAService.analyze(
-                    incident,
-                    similarIncidents
-                );
-
-
-
-            logger.info(
-                {
-                    event: "rca_analysis_completed",
-
-                    metadata: {
-
-                        incidentId:
-                            incident.incidentId,
-
-                        confidence:
-                            analysis.confidence,
-
-                        rootCause:
-                            analysis.rootCause
-                    }
-                },
-
-                "RCA analysis completed"
-            );
-
-
-
-            const enrichedIncident = {
-
-                ...incident,
-
-                aiAnalysis:
-                    analysis,
-
-                similarIncidents
-
-            };
-
-
-
-            await incidentModel.create(
-                enrichedIncident
-            );
-
-
-
-            logger.info(
-                {
-                    event: "incident_stored",
-
-                    metadata: {
-
-                        incidentId:
-                            incident.incidentId
-                    }
-                },
-
-                "Incident stored successfully"
-            );
-
-
-
-        } catch (error) {
-
-
-            logger.error(
-                {
-                    event: "incident_processing_failed",
-
-                    err: error,
-
-                    metadata: {
-
-                        component:
-                            "incident-processing",
-
-                        incidentType:
-                            "INCIDENT_PROCESSING_FAILURE",
-
-                        topic
-                    }
-
-                },
-
-                "Failed to process incident"
-
-            );
-
-
-            throw error;
-        }
-
+      throw error;
     }
-
+  }
 }

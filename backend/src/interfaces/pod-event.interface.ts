@@ -1,7 +1,7 @@
 export interface PodEvent {
   timestamp: Date;
 
-  source: "kubernetes";
+  source: 'kubernetes';
 
   namespace?: string;
 

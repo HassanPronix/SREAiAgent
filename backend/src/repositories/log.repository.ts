@@ -1,4 +1,4 @@
-import { BackendLogModel } from "../models/backendLog.model.js";
+import { BackendLogModel } from '../models/backendLog.model.js';
 
 class LogRepository {
   async create(payload: any) {
@@ -6,4 +6,4 @@ class LogRepository {
   }
 }
 
-export const logRepository =new LogRepository();
+export const logRepository = new LogRepository();

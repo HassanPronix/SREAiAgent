@@ -1,13 +1,13 @@
 export interface NodeEvent {
-    timestamp: Date;
+  timestamp: Date;
 
-    source: "kubernetes";
+  source: 'kubernetes';
 
-    nodeName: string;
+  nodeName: string;
 
-    ready: boolean;
+  ready: boolean;
 
-    conditions: string[];
+  conditions: string[];
 
-    metadata?: Record<string, unknown>;
+  metadata?: Record<string, unknown>;
 }

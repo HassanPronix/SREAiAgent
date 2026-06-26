@@ -1,14 +1,9 @@
 export interface LogEvent {
   timestamp: Date;
 
-  source:
-    | "backend"
-    | "fluentbit"
-    | "kubernetes"
-    | "prometheus"
-    | "incident";
+  source: 'backend' | 'fluentbit' | 'kubernetes' | 'prometheus' | 'incident';
 
-  severity: "INFO" | "WARN" | "ERROR" | "CRITICAL";
+  severity: 'INFO' | 'WARN' | 'ERROR' | 'CRITICAL';
 
   cluster?: string;
 

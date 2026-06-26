@@ -1,4 +1,4 @@
-import dotenv from "dotenv";
+import dotenv from 'dotenv';
 
 dotenv.config();
 
@@ -7,13 +7,13 @@ export const env = {
 
   mongoUri: process.env.MONGO_URI!,
 
-  kafkaBrokers: process.env.KAFKA_BROKERS?.split(",") || ["localhost:9092"],
+  kafkaBrokers: process.env.KAFKA_BROKERS?.split(',') || ['localhost:9092'],
 
   qdrantUrl: process.env.QDRANT_URL!,
 
-  nodeEnv: process.env.NODE_ENV || "development",
+  nodeEnv: process.env.NODE_ENV || 'development',
 
-  serviceName: process.env.SERVICE_NAME || "api-service",
+  serviceName: process.env.SERVICE_NAME || 'api-service',
 
-  logLevel: process.env.LOG_LEVEL || "info",
+  logLevel: process.env.LOG_LEVEL || 'info',
 };

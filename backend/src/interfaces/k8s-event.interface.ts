@@ -1,27 +1,23 @@
 export interface K8sEvent {
-    timestamp: Date;
+  timestamp: Date;
 
-    source: "kubernetes";
+  source: 'kubernetes';
 
-    cluster?: string;
+  cluster?: string;
 
-    namespace?: string;
+  namespace?: string;
 
-    kind?: string;
+  kind?: string;
 
-    resourceName?: string;
+  resourceName?: string;
 
-    reason: string;
+  reason: string;
 
-    message: string;
+  message: string;
 
-    type?: string;
+  type?: string;
 
-    severity:
-    | "INFO"
-    | "WARN"
-    | "ERROR"
-    | "CRITICAL";
+  severity: 'INFO' | 'WARN' | 'ERROR' | 'CRITICAL';
 
-    metadata?: Record<string, unknown>;
+  metadata?: Record<string, unknown>;
 }

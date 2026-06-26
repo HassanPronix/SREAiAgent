@@ -1,177 +1,122 @@
-import { ConsumerService } from "../services/kafka/consumer.service.js";
-import { observabilityEventRepository } from "../repositories/observability-event.repository.js";
-import { logger } from "../config/logger.js";
+import { ConsumerService } from '../services/kafka/consumer.service.js';
+import { observabilityEventRepository } from '../repositories/observability-event.repository.js';
+import { logger } from '../config/logger.js';
 
-
-export async function startObservabilityConsumer(
-  topic: string,
-  groupId: string
-) {
-
+export async function startObservabilityConsumer(topic: string, groupId: string) {
   const consumer = new ConsumerService(groupId);
 
-
   try {
-
     await consumer.connect();
-
 
     logger.info(
       {
-        event: "observability_consumer_connected",
+        event: 'observability_consumer_connected',
 
         metadata: {
-          component: "event-ingestion",
+          component: 'event-ingestion',
           topic,
-          groupId
-        }
+          groupId,
+        },
       },
 
-      "Observability consumer connected"
+      'Observability consumer connected',
     );
-
-
 
     await consumer.subscribe([topic]);
 
-
-
     logger.info(
       {
-        event: "observability_topic_subscribed",
+        event: 'observability_topic_subscribed',
 
         metadata: {
           topic,
-          groupId
-        }
+          groupId,
+        },
       },
 
-      "Subscribed to observability topic"
+      'Subscribed to observability topic',
     );
 
-
-
     await consumer.run(async (_, message: string) => {
-
-
       const receivedAt = new Date();
 
-
       try {
-
         const payload = JSON.parse(message);
-
-
 
         logger.debug(
           {
-            event: "observability_event_received",
+            event: 'observability_event_received',
 
             metadata: {
-
               topic,
 
-              eventType:
-                payload.type ||
-                payload.reason ||
-                payload.kind ||
-                "unknown",
+              eventType: payload.type || payload.reason || payload.kind || 'unknown',
 
-              receivedAt
-            }
+              receivedAt,
+            },
           },
 
-          "Observability event received"
+          'Observability event received',
         );
 
-
-
-        await observabilityEventRepository.create(
-          payload
-        );
-
-
+        await observabilityEventRepository.create(payload);
 
         logger.info(
           {
-            event: "observability_event_stored",
+            event: 'observability_event_stored',
 
             metadata: {
-
               topic,
 
-              eventType:
-                payload.type ||
-                payload.reason ||
-                payload.kind ||
-                "unknown",
+              eventType: payload.type || payload.reason || payload.kind || 'unknown',
 
-              stored: true
-            }
+              stored: true,
+            },
           },
 
-          "Observability event stored"
+          'Observability event stored',
         );
-
-
       } catch (error) {
-
-
         logger.error(
           {
-            event: "observability_event_processing_failed",
+            event: 'observability_event_processing_failed',
 
             err: error,
 
             metadata: {
+              component: 'event-ingestion',
 
-              component:
-                "event-ingestion",
-
-              incidentType:
-                "OBSERVABILITY_EVENT_PROCESSING_FAILURE",
+              incidentType: 'OBSERVABILITY_EVENT_PROCESSING_FAILURE',
 
               topic,
               groupId,
-              receivedAt
-            }
-
+              receivedAt,
+            },
           },
 
-          "Failed to process observability event"
+          'Failed to process observability event',
         );
-
       }
-
     });
-
-
   } catch (error) {
-
-
     logger.fatal(
       {
-        event: "observability_consumer_start_failed",
+        event: 'observability_consumer_start_failed',
 
         err: error,
 
         metadata: {
+          component: 'event-ingestion',
 
-          component:
-            "event-ingestion",
-
-          incidentType:
-            "OBSERVABILITY_CONSUMER_START_FAILURE",
+          incidentType: 'OBSERVABILITY_CONSUMER_START_FAILURE',
 
           topic,
-          groupId
-        }
-
+          groupId,
+        },
       },
 
-      "Observability consumer failed to start"
+      'Observability consumer failed to start',
     );
-
 
     process.exit(1);
   }

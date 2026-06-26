@@ -1,19 +1,16 @@
-export type Severity =
-    | "INFO"
-    | "WARNING"
-    | "CRITICAL";
+export type Severity = 'INFO' | 'WARNING' | 'CRITICAL';
 
 export interface NormalizedEvent {
-    source: string;
-    timestamp: Date;
-    severity: Severity;
+  source: string;
+  timestamp: Date;
+  severity: Severity;
 
-    namespace?: string;
+  namespace?: string;
 
-    resourceType: string;
-    resourceName: string;
+  resourceType: string;
+  resourceName: string;
 
-    message: string;
+  message: string;
 
-    rawData: any;
+  rawData: any;
 }

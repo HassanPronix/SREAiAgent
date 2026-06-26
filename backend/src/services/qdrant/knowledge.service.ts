@@ -1,48 +1,42 @@
-import { qdrantService } from "./qdrant.service.js";
-import { embeddingService } from "./embedding.service.js";
-import { buildIncidentSummary } from "./incident-summary.service.js";
+import { qdrantService } from './qdrant.service.js';
+import { embeddingService } from './embedding.service.js';
+import { buildIncidentSummary } from './incident-summary.service.js';
 
 // TODO: implement Qdrant first
-export async function
-    storeResolvedIncident(
-        incident: any
-    ) {
+export async function storeResolvedIncident(incident: any) {
+  const summary = buildIncidentSummary(incident);
 
-    const summary = buildIncidentSummary(incident);
+  const vector = await embeddingService.generateEmbedding(summary);
 
-    const vector = await embeddingService.generateEmbedding(summary);
+  await qdrantService.client.upsert('incident_knowledge', {
+    wait: true,
 
-    await qdrantService.client.upsert("incident_knowledge", {
-        wait: true,
+    points: [
+      {
+        id: incident.incidentId,
 
-        points: [
-            {
-                id: incident.incidentId,
+        vector,
 
-                vector,
+        payload: {
+          incidentId: incident.incidentId,
 
-                payload: {
-                    incidentId: incident.incidentId,
+          title: incident.title,
 
-                    title: incident.title,
+          severity: incident.severity,
 
-                    severity: incident.severity,
+          namespace: incident.namespace,
 
-                    namespace: incident.namespace,
+          service: incident.service,
 
-                    service: incident.service,
+          rootCause: incident.rootCause,
 
-                    rootCause: incident.rootCause,
+          recommendation: incident.recommendation,
 
-                    recommendation: incident.recommendation,
+          summary,
 
-                    summary,
-
-                    createdAt:
-                        new Date(),
-                },
-            },
-        ],
-    }
-    );
+          createdAt: new Date(),
+        },
+      },
+    ],
+  });
 }

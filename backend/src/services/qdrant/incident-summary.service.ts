@@ -1,6 +1,5 @@
 export function buildIncidentSummary(incident: any): string {
-
-    return `
+  return `
             Title: ${incident.title}
             
             Severity: ${incident.severity}

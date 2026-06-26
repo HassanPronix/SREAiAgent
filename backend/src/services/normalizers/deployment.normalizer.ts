@@ -1,30 +1,29 @@
-import { DeploymentEvent } from "../../interfaces/deployment-event.interface.js";
+import { DeploymentEvent } from '../../interfaces/deployment-event.interface.js';
 
 export function normalizeDeployment(phase: string, deployment: any): DeploymentEvent {
+  const container = deployment.spec?.template?.spec?.containers?.[0];
 
-    const container = deployment.spec?.template?.spec?.containers?.[0];
+  return {
+    timestamp: new Date(),
 
-    return {
-        timestamp: new Date(),
+    source: 'kubernetes',
 
-        source: "kubernetes",
+    namespace: deployment.metadata?.namespace,
 
-        namespace: deployment.metadata?.namespace,
+    deploymentName: deployment.metadata?.name,
 
-        deploymentName: deployment.metadata?.name,
+    replicas: deployment.spec?.replicas,
 
-        replicas: deployment.spec?.replicas,
+    availableReplicas: deployment.status?.availableReplicas,
 
-        availableReplicas: deployment.status?.availableReplicas,
+    readyReplicas: deployment.status?.readyReplicas,
 
-        readyReplicas: deployment.status?.readyReplicas,
+    generation: deployment.metadata?.generation,
 
-        generation: deployment.metadata?.generation,
+    image: container?.image,
 
-        image: container?.image,
+    phase,
 
-        phase,
-
-        metadata: deployment
-    };
+    metadata: deployment,
+  };
 }

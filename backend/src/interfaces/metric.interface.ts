@@ -1,7 +1,7 @@
 export interface MetricEvent {
   timestamp: Date;
 
-  source: "prometheus";
+  source: 'prometheus';
 
   metricName: string;
 
@@ -17,7 +17,7 @@ export interface MetricEvent {
 
   unit?: string;
 
-  severity?: "INFO" | "WARN" | "ERROR" | "CRITICAL";
+  severity?: 'INFO' | 'WARN' | 'ERROR' | 'CRITICAL';
 
   labels?: Record<string, string>;
 

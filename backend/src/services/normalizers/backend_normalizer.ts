@@ -1,17 +1,12 @@
-import { LogEvent } from "../../interfaces/log-event.interface.js";
+import { LogEvent } from '../../interfaces/log-event.interface.js';
 
-export function normalizeBackendLog(
-  payload: any
-): LogEvent {
+export function normalizeBackendLog(payload: any): LogEvent {
   return {
     timestamp: new Date(payload.timestamp),
 
-    source: "backend",
+    source: 'backend',
 
-    severity:
-      payload.statusCode >= 500
-        ? "ERROR"
-        : "INFO",
+    severity: payload.statusCode >= 500 ? 'ERROR' : 'INFO',
 
     service: payload.service,
 

@@ -1,37 +1,34 @@
-import { Schema, model } from "mongoose";
+import { Schema, model } from 'mongoose';
 
 const K8sEventSchema = new Schema(
-    {
-        timestamp: Date,
+  {
+    timestamp: Date,
 
-        source: String,
+    source: String,
 
-        namespace: String,
+    namespace: String,
 
-        kind: String,
+    kind: String,
 
-        resourceName: String,
+    resourceName: String,
 
-        reason: String,
+    reason: String,
 
-        message: String,
+    message: String,
 
-        type: String,
+    type: String,
 
-        severity: String,
+    severity: String,
 
-        metadata: Schema.Types.Mixed,
-    },
-    {
-        timestamps: true,
-    }
+    metadata: Schema.Types.Mixed,
+  },
+  {
+    timestamps: true,
+  },
 );
 
 K8sEventSchema.index({
-    timestamp: -1,
+  timestamp: -1,
 });
 
-export const K8sEventModel = model(
-    "K8sEvent",
-    K8sEventSchema
-);
+export const K8sEventModel = model('K8sEvent', K8sEventSchema);

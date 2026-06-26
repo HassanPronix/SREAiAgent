@@ -1,7 +1,7 @@
 export interface DeploymentEvent {
   timestamp: Date;
 
-  source: "kubernetes";
+  source: 'kubernetes';
 
   namespace?: string;
 

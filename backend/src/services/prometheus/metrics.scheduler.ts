@@ -1,101 +1,76 @@
-import cron from "node-cron";
+import cron from 'node-cron';
 
-import { producerService } from "../kafka/producer.service.js";
-import { TOPICS } from "../kafka/topics.js";
-import { prometheusService } from "./prometheus.service.js";
-import { logger } from "../../config/logger.js";
-
+import { producerService } from '../kafka/producer.service.js';
+import { TOPICS } from '../kafka/topics.js';
+import { prometheusService } from './prometheus.service.js';
+import { logger } from '../../config/logger.js';
 
 export function startMetricsCollector() {
+  logger.info(
+    {
+      service: 'metrics-collector',
+      interval: '1 minute',
+    },
+    'Metrics collector started',
+  );
 
+  cron.schedule(
+    '*/1 * * * *',
 
-    logger.info(
-        {
-            service: "metrics-collector",
-            interval: "1 minute"
-        },
-        "Metrics collector started"
-    );
+    async () => {
+      const startedAt = Date.now();
 
+      try {
+        const cpuResults = await prometheusService.query(
+          'sum(rate(container_cpu_usage_seconds_total[5m])) by (name)',
+        );
 
+        await producerService.publish(
+          TOPICS.METRICS,
 
-    cron.schedule(
-        "*/1 * * * *",
+          {
+            metricName: 'cpu_usage',
 
-        async () => {
+            timestamp: new Date(),
 
+            data: cpuResults,
+          },
+        );
 
-            const startedAt =
-                Date.now();
+        logger.info(
+          {
+            service: 'metrics-collector',
 
+            metric: 'cpu_usage',
 
+            duration: Date.now() - startedAt,
 
-            try {
+            topic: TOPICS.METRICS,
+          },
 
+          'Metrics collected and published',
+        );
+      } catch (error) {
+        logger.error(
+          {
+            err: error,
 
-                const cpuResults = await prometheusService.query("sum(rate(container_cpu_usage_seconds_total[5m])) by (name)"
-                );
+            service: 'metrics-collector',
 
-                await producerService.publish(
+            component: 'prometheus-collector',
 
-                    TOPICS.METRICS,
+            incidentType: 'METRICS_COLLECTION_FAILURE',
 
-                    {
-                        metricName:
-                            "cpu_usage",
+            metadata: {
+              metric: 'cpu_usage',
 
-                        timestamp:
-                            new Date(),
+              topic: TOPICS.METRICS,
+            },
+          },
 
-                        data:
-                            cpuResults
-                    }
-
-                );
-
-                logger.info(
-                    {
-                        service: "metrics-collector",
-
-                        metric: "cpu_usage",
-
-                        duration: Date.now() - startedAt,
-
-                        topic: TOPICS.METRICS
-
-                    },
-
-                    "Metrics collected and published"
-                );
-
-
-
-            } catch (error) {
-
-                logger.error(
-                    {
-                        err: error,
-
-                        service: "metrics-collector",
-
-                        component: "prometheus-collector",
-
-                        incidentType: "METRICS_COLLECTION_FAILURE",
-
-                        metadata: {
-
-                            metric: "cpu_usage",
-
-                            topic: TOPICS.METRICS
-
-                        }
-                    },
-
-                    "Failed to collect metrics"
-                );
-
-            }
-        }
-    );
-
+          'Failed to collect metrics',
+        );
+      }
+    },
+  );
 }

@@ -1,33 +1,17 @@
-export function normalizeNode(
-    node: any
-) {
+export function normalizeNode(node: any) {
+  const conditions = node.status?.conditions || [];
 
-    const conditions =
-        node.status?.conditions || [];
+  return {
+    timestamp: new Date(),
 
-    return {
+    source: 'kubernetes',
 
-        timestamp: new Date(),
+    nodeName: node.metadata?.name,
 
-        source: "kubernetes",
+    ready: conditions.find((c: any) => c.type === 'Ready')?.status === 'True',
 
-        nodeName:
-            node.metadata?.name,
+    conditions: conditions.filter((c: any) => c.status === 'True').map((c: any) => c.type),
 
-        ready:
-            conditions.find(
-                (c: any) => c.type === "Ready"
-            )?.status === "True",
-
-        conditions:
-            conditions
-                .filter(
-                    (c: any) => c.status === "True"
-                )
-                .map(
-                    (c: any) => c.type
-                ),
-
-        metadata: node
-    };
+    metadata: node,
+  };
 }

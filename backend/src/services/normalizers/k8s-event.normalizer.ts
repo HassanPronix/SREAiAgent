@@ -1,44 +1,44 @@
-import { K8sEvent } from "../../interfaces/k8s-event.interface.js";
+import { K8sEvent } from '../../interfaces/k8s-event.interface.js';
 
 export function normalizeK8sEvent(event: any): K8sEvent {
+  let severity: K8sEvent['severity'] = 'INFO';
 
-    let severity: K8sEvent["severity"] = "INFO";
+  if (event.type === 'Warning') {
+    severity = 'ERROR';
+  }
 
-    if (event.type === "Warning") {
-        severity = "ERROR";
-    }
-
-    if ([
-        "BackOff",
-        "FailedScheduling",
-        "Evicted",
-        "NodeNotReady",
-        "OOMKilled",
-        "ImagePullBackOff",
+  if (
+    [
+      'BackOff',
+      'FailedScheduling',
+      'Evicted',
+      'NodeNotReady',
+      'OOMKilled',
+      'ImagePullBackOff',
     ].includes(event.reason)
-    ) {
-        severity = "CRITICAL";
-    }
+  ) {
+    severity = 'CRITICAL';
+  }
 
-    return {
-        timestamp: new Date(),
+  return {
+    timestamp: new Date(),
 
-        source: "kubernetes",
+    source: 'kubernetes',
 
-        namespace: event.metadata?.namespace,
+    namespace: event.metadata?.namespace,
 
-        kind: event.involvedObject?.kind,
+    kind: event.involvedObject?.kind,
 
-        resourceName: event.involvedObject?.name,
+    resourceName: event.involvedObject?.name,
 
-        reason: event.reason,
+    reason: event.reason,
 
-        message: event.message,
+    message: event.message,
 
-        type: event.type,
+    type: event.type,
 
-        severity,
+    severity,
 
-        metadata: event,
-    };
+    metadata: event,
+  };
 }

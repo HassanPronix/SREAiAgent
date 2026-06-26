@@ -1,41 +1,38 @@
-import { Schema, model } from "mongoose";
+import { Schema, model } from 'mongoose';
 
 const LogSchema = new Schema(
-    {
-        timestamp: Date,
+  {
+    timestamp: Date,
 
-        source: String,
+    source: String,
 
-        severity: String,
+    severity: String,
 
-        cluster: String,
+    cluster: String,
 
-        namespace: String,
+    namespace: String,
 
-        pod: String,
+    pod: String,
 
-        container: String,
+    container: String,
 
-        service: String,
+    service: String,
 
-        requestId: String,
+    requestId: String,
 
-        traceId: String,
+    traceId: String,
 
-        message: String,
+    message: String,
 
-        metadata: Schema.Types.Mixed
-    },
-    {
-        timestamps: true
-    }
+    metadata: Schema.Types.Mixed,
+  },
+  {
+    timestamps: true,
+  },
 );
 LogSchema.index({ timestamp: -1 });
 LogSchema.index({ service: 1 });
 LogSchema.index({ requestId: 1 });
 LogSchema.index({ traceId: 1 });
 
-export const LogModel = model(
-    "Log",
-    LogSchema
-);
+export const LogModel = model('Log', LogSchema);

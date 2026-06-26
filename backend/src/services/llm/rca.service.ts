@@ -1,34 +1,35 @@
-import { llm } from "./llm.service.js";
-import { PromptTemplate } from "@langchain/core/prompts";
-import { StructuredOutputParser } from "@langchain/core/output_parsers";
-
+import { llm } from './llm.service.js';
+import { PromptTemplate } from '@langchain/core/prompts';
+import { StructuredOutputParser } from '@langchain/core/output_parsers';
 
 export class RCAService {
+  static async analyze(currentIncident: any, similarIncidents: any[] = []) {
+    const hasHistory = similarIncidents.length > 0;
 
-    static async analyze(currentIncident: any, similarIncidents: any[] = []) {
+    const parser = StructuredOutputParser.fromNamesAndDescriptions({
+      summary: 'Short summary of the incident',
+      rootCause: 'Probable root cause',
+      remediation: 'Array of remediation steps',
+      confidence: 'Confidence percentage number between 0 and 100',
+      explanation: 'Reasoning behind the RCA',
+    });
 
-        const hasHistory = similarIncidents.length > 0;
-
-        const parser = StructuredOutputParser.fromNamesAndDescriptions({
-            summary: "Short summary of the incident",
-            rootCause: "Probable root cause",
-            remediation: "Array of remediation steps",
-            confidence: "Confidence percentage number between 0 and 100",
-            explanation: "Reasoning behind the RCA"
-        });
-
-
-        const history = hasHistory ? similarIncidents.map((incident, index) => `
+    const history = hasHistory
+      ? similarIncidents
+          .map(
+            (incident, index) => `
                             Incident ${index + 1}
                                 
                             Content:
                             ${incident.content}
                                 
                             Metadata:
-                            ${JSON.stringify(incident.metadata)}`)
-            .join("\n") : "No historical incidents available";
+                            ${JSON.stringify(incident.metadata)}`,
+          )
+          .join('\n')
+      : 'No historical incidents available';
 
-        const prompt = PromptTemplate.fromTemplate(`
+    const prompt = PromptTemplate.fromTemplate(`
                             You are an expert Kubernetes Site Reliability Engineer.
                                     
                             Analyze the CURRENT INCIDENT.
@@ -37,7 +38,9 @@ export class RCAService {
                             {incident}
                                     
                                     
-                            ${hasHistory ? `
+                            ${
+                              hasHistory
+                                ? `
                             SIMILAR HISTORICAL INCIDENTS:
                             
                             {history}
@@ -46,7 +49,8 @@ export class RCAService {
                             - identify patterns
                             - compare failures
                             - suggest proven remediation steps
-                            ` : `
+                            `
+                                : `
                             No similar historical incident exists.
                             
                             Only provide:
@@ -54,7 +58,8 @@ export class RCAService {
                             - explanation
                             
                             Do NOT invent remediation from history.
-                            `}
+                            `
+                            }
                             
                             
                             Rules:
@@ -65,19 +70,16 @@ export class RCAService {
                             {format}
                             `);
 
+    const chain = prompt.pipe(llm).pipe(parser);
 
-        const chain = prompt.pipe(llm).pipe(parser);
+    const response = await chain.invoke({
+      incident: JSON.stringify(currentIncident, null, 2),
 
+      history,
 
-        const response = await chain.invoke({
+      format: parser.getFormatInstructions(),
+    });
 
-            incident: JSON.stringify(currentIncident, null, 2),
-
-            history,
-
-            format: parser.getFormatInstructions()
-        });
-
-        return response;
-    }
+    return response;
+  }
 }

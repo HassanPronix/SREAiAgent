@@ -1,51 +1,39 @@
-import mongoose from "mongoose";
-import { logger } from "./logger.js";
-
+import mongoose from 'mongoose';
+import { logger } from './logger.js';
 
 export async function connectDB(): Promise<void> {
-
-  const uri =
-    process.env.MONGO_URI ||
-    "mongodb://localhost:27017/SREAiOps";
-
+  const uri = process.env.MONGO_URI || 'mongodb://localhost:27017/SREAiOps';
 
   try {
-
     await mongoose.connect(uri);
-
 
     logger.info(
       {
-        database: "mongodb",
+        database: 'mongodb',
         host: mongoose.connection.host,
-        name: mongoose.connection.name
+        name: mongoose.connection.name,
       },
-      "MongoDB connected"
+      'MongoDB connected',
     );
-
-
   } catch (error) {
-
-
     logger.error(
       {
         err: error,
 
-        service: "database",
+        service: 'database',
 
-        component: "mongodb",
+        component: 'mongodb',
 
-        incidentType: "DATABASE_CONNECTION_FAILURE",
+        incidentType: 'DATABASE_CONNECTION_FAILURE',
 
         metadata: {
-          database: "mongodb",
-          host: uri.replace(/\/\/.*@/, "//[REDACTED]@")
-        }
+          database: 'mongodb',
+          host: uri.replace(/\/\/.*@/, '//[REDACTED]@'),
+        },
       },
 
-      "MongoDB connection failed"
+      'MongoDB connection failed',
     );
-
 
     process.exit(1);
   }

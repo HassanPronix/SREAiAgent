@@ -1,103 +1,79 @@
-import { NormalizedEvent } from "../../interfaces/normalized-event.interface.js";
+import { NormalizedEvent } from '../../interfaces/normalized-event.interface.js';
 
-export function normalizeEvent(
-    topic: string,
-    payload: any
-): NormalizedEvent {
+export function normalizeEvent(topic: string, payload: any): NormalizedEvent {
+  switch (topic) {
+    case 'backend-logs':
+      return {
+        source: 'logs',
 
-    switch (topic) {
+        timestamp: new Date(payload.timestamp || Date.now()),
 
-        case "backend-logs":
+        severity: payload.level === 'ERROR' ? 'CRITICAL' : 'INFO',
 
-            return {
-                source: "logs",
+        resourceType: 'pod',
 
-                timestamp: new Date(
-                    payload.timestamp || Date.now()
-                ),
+        resourceName: payload.kubernetes?.pod_name || 'unknown',
 
-                severity:
-                    payload.level === "ERROR"
-                        ? "CRITICAL"
-                        : "INFO",
+        namespace: payload.kubernetes?.namespace_name,
 
-                resourceType: "pod",
+        message: payload.message,
 
-                resourceName:
-                    payload.kubernetes?.pod_name ||
-                    "unknown",
+        rawData: payload,
+      };
 
-                namespace:
-                    payload.kubernetes?.namespace_name,
+    case 'pod-events':
+      return {
+        source: 'k8s',
 
-                message: payload.message,
+        timestamp: new Date(),
 
-                rawData: payload
-            };
+        severity: payload.reason === 'CrashLoopBackOff' ? 'CRITICAL' : 'WARNING',
 
-        case "pod-events":
+        resourceType: 'pod',
 
-            return {
-                source: "k8s",
+        resourceName: payload.pod,
 
-                timestamp: new Date(),
+        namespace: payload.namespace,
 
-                severity:
-                    payload.reason === "CrashLoopBackOff"
-                        ? "CRITICAL"
-                        : "WARNING",
+        message: payload.reason,
 
-                resourceType: "pod",
+        rawData: payload,
+      };
 
-                resourceName: payload.pod,
+    case 'metric-anomalies':
+      return {
+        source: 'metrics',
 
-                namespace: payload.namespace,
+        timestamp: new Date(),
 
-                message: payload.reason,
+        severity: payload.score > 0.9 ? 'CRITICAL' : 'WARNING',
 
-                rawData: payload
-            };
+        resourceType: 'service',
 
-        case "metric-anomalies":
+        resourceName: payload.service,
 
-            return {
-                source: "metrics",
+        namespace: payload.namespace,
 
-                timestamp: new Date(),
+        message: payload.description,
 
-                severity:
-                    payload.score > 0.9
-                        ? "CRITICAL"
-                        : "WARNING",
+        rawData: payload,
+      };
 
-                resourceType: "service",
+    default:
+      return {
+        source: topic,
 
-                resourceName: payload.service,
+        timestamp: new Date(),
 
-                namespace: payload.namespace,
+        severity: 'INFO',
 
-                message:
-                    payload.description,
+        resourceType: 'unknown',
 
-                rawData: payload
-            };
+        resourceName: 'unknown',
 
-        default:
+        message: 'Unknown event',
 
-            return {
-                source: topic,
-
-                timestamp: new Date(),
-
-                severity: "INFO",
-
-                resourceType: "unknown",
-
-                resourceName: "unknown",
-
-                message: "Unknown event",
-
-                rawData: payload
-            };
-    }
+        rawData: payload,
+      };
+  }
 }

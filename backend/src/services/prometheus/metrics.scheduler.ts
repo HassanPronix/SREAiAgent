@@ -11,9 +11,19 @@ export function startMetricsCollector() {
 
     logger.info(
         {
-            service: "metrics-collector",
-            interval: "1 minute"
+            event: "metrics_collector_started",
+
+            metadata: {
+
+                component:
+                    "prometheus-collector",
+
+                interval:
+                    "1 minute"
+
+            }
         },
+
         "Metrics collector started"
     );
 
@@ -33,8 +43,12 @@ export function startMetricsCollector() {
             try {
 
 
-                const cpuResults = await prometheusService.query("sum(rate(container_cpu_usage_seconds_total[5m])) by (name)"
-                );
+                const cpuResults =
+                    await prometheusService.query(
+                        "sum(rate(container_cpu_usage_seconds_total[5m])) by (name)"
+                    );
+
+
 
                 await producerService.publish(
 
@@ -53,15 +67,27 @@ export function startMetricsCollector() {
 
                 );
 
+
+
                 logger.info(
                     {
-                        service: "metrics-collector",
+                        event: "metrics_collected_and_published",
 
-                        metric: "cpu_usage",
+                        metadata: {
 
-                        duration: Date.now() - startedAt,
+                            component:
+                                "prometheus-collector",
 
-                        topic: TOPICS.METRICS
+                            metric:
+                                "cpu_usage",
+
+                            duration:
+                                Date.now() - startedAt,
+
+                            topic:
+                                TOPICS.METRICS
+
+                        }
 
                     },
 
@@ -72,23 +98,29 @@ export function startMetricsCollector() {
 
             } catch (error) {
 
+
                 logger.error(
                     {
+                        event: "metrics_collection_failed",
+
                         err: error,
-
-                        service: "metrics-collector",
-
-                        component: "prometheus-collector",
-
-                        incidentType: "METRICS_COLLECTION_FAILURE",
 
                         metadata: {
 
-                            metric: "cpu_usage",
+                            component:
+                                "prometheus-collector",
 
-                            topic: TOPICS.METRICS
+                            incidentType:
+                                "METRICS_COLLECTION_FAILURE",
+
+                            metric:
+                                "cpu_usage",
+
+                            topic:
+                                TOPICS.METRICS
 
                         }
+
                     },
 
                     "Failed to collect metrics"

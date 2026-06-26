@@ -16,10 +16,16 @@ export async function connectDB(): Promise<void> {
 
     logger.info(
       {
-        database: "mongodb",
-        host: mongoose.connection.host,
-        name: mongoose.connection.name
+        event: "database_connected",
+
+        metadata: {
+          component: "mongodb",
+          database: "mongodb",
+          host: mongoose.connection.host,
+          name: mongoose.connection.name
+        }
       },
+
       "MongoDB connected"
     );
 
@@ -29,17 +35,18 @@ export async function connectDB(): Promise<void> {
 
     logger.error(
       {
+        event: "database_connection_failed",
+
         err: error,
 
-        service: "database",
-
-        component: "mongodb",
-
-        incidentType: "DATABASE_CONNECTION_FAILURE",
-
         metadata: {
+          component: "mongodb",
+          incidentType: "DATABASE_CONNECTION_FAILURE",
           database: "mongodb",
-          host: uri.replace(/\/\/.*@/, "//[REDACTED]@")
+          host: uri.replace(
+            /\/\/.*@/,
+            "//[REDACTED]@"
+          )
         }
       },
 

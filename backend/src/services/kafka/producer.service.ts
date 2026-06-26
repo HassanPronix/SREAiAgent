@@ -26,7 +26,11 @@ class ProducerService {
 
       logger.info(
         {
-          service: "kafka-producer"
+          event: "kafka_producer_connected",
+
+          metadata: {
+            component: "kafka-producer"
+          }
         },
 
         "Kafka producer connected"
@@ -38,12 +42,19 @@ class ProducerService {
 
       logger.fatal(
         {
+          event: "kafka_producer_connect_failed",
+
           err: error,
 
-          service: "kafka-producer",
+          metadata: {
 
-          incidentType:
-            "KAFKA_PRODUCER_CONNECT_FAILURE"
+            component:
+              "kafka-producer",
+
+            incidentType:
+              "KAFKA_PRODUCER_CONNECT_FAILURE"
+
+          }
 
         },
 
@@ -59,6 +70,7 @@ class ProducerService {
 
 
 
+
   async disconnect() {
 
 
@@ -68,9 +80,14 @@ class ProducerService {
       await this.producer.disconnect();
 
 
+
       logger.info(
         {
-          service: "kafka-producer"
+          event: "kafka_producer_disconnected",
+
+          metadata: {
+            component: "kafka-producer"
+          }
         },
 
         "Kafka producer disconnected"
@@ -82,12 +99,19 @@ class ProducerService {
 
       logger.error(
         {
+          event: "kafka_producer_disconnect_failed",
+
           err: error,
 
-          service: "kafka-producer",
+          metadata: {
 
-          incidentType:
-            "KAFKA_PRODUCER_DISCONNECT_FAILURE"
+            component:
+              "kafka-producer",
+
+            incidentType:
+              "KAFKA_PRODUCER_DISCONNECT_FAILURE"
+
+          }
 
         },
 
@@ -104,6 +128,7 @@ class ProducerService {
 
 
 
+
   async publish(
     topic: string,
     payload: unknown
@@ -111,6 +136,11 @@ class ProducerService {
 
 
     try {
+
+
+      const messageSize =
+        JSON.stringify(payload).length;
+
 
 
       await this.producer.send({
@@ -128,14 +158,21 @@ class ProducerService {
 
 
 
+
       logger.debug(
         {
-          service: "kafka-producer",
+          event: "kafka_message_published",
 
-          topic,
+          metadata: {
 
-          messageSize:
-            JSON.stringify(payload).length
+            component:
+              "kafka-producer",
+
+            topic,
+
+            messageSize
+
+          }
 
         },
 
@@ -149,14 +186,17 @@ class ProducerService {
 
       logger.error(
         {
+          event: "kafka_publish_failed",
+
           err: error,
 
-          service: "kafka-producer",
-
-          incidentType:
-            "KAFKA_PUBLISH_FAILURE",
-
           metadata: {
+
+            component:
+              "kafka-producer",
+
+            incidentType:
+              "KAFKA_PUBLISH_FAILURE",
 
             topic,
 
@@ -179,4 +219,5 @@ class ProducerService {
 }
 
 
-export const producerService = new ProducerService();
+export const producerService =
+  new ProducerService();

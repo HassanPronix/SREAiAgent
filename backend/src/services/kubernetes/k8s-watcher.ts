@@ -3,6 +3,7 @@ import { kubernetesService } from "./kubernetes.service.js";
 import { producerService } from "../kafka/producer.service.js";
 import { logger } from "../../config/logger.js";
 
+
 interface ResourceWatcherOptions<TResource, TPayload> {
 
     path: string;
@@ -17,6 +18,8 @@ interface ResourceWatcherOptions<TResource, TPayload> {
         resource: TResource
     ) => TPayload | Promise<TPayload>;
 }
+
+
 
 export async function startResourceWatcher<
     TResource,
@@ -40,13 +43,20 @@ export async function startResourceWatcher<
 
     logger.info(
         {
-            service: "kubernetes-watcher",
+            event: "kubernetes_watcher_started",
 
-            resourceName,
+            metadata: {
 
-            path,
+                component:
+                    "kubernetes-watch",
 
-            topic
+                resourceName,
+
+                path,
+
+                topic
+
+            }
 
         },
 
@@ -82,14 +92,20 @@ export async function startResourceWatcher<
 
                     logger.debug(
                         {
-                            service:
-                                "kubernetes-watcher",
+                            event: "kubernetes_event_received",
 
-                            resourceName,
+                            metadata: {
 
-                            phase,
+                                component:
+                                    "kubernetes-watch",
 
-                            receivedAt
+                                resourceName,
+
+                                phase,
+
+                                receivedAt
+                            }
+
                         },
 
                         "Kubernetes resource event received"
@@ -113,13 +129,20 @@ export async function startResourceWatcher<
 
 
 
+
                     logger.info(
                         {
-                            resourceName,
+                            event: "kubernetes_event_published",
 
-                            topic,
+                            metadata: {
 
-                            phase
+                                resourceName,
+
+                                topic,
+
+                                phase
+
+                            }
 
                         },
 
@@ -133,19 +156,18 @@ export async function startResourceWatcher<
 
                     logger.error(
                         {
+                            event: "kubernetes_event_processing_failed",
+
                             err: error,
-
-                            service:
-                                "kubernetes-watcher",
-
-                            component:
-                                "resource-normalizer",
-
-                            incidentType:
-                                "KUBERNETES_EVENT_PROCESSING_FAILURE",
 
 
                             metadata: {
+
+                                component:
+                                    "resource-normalizer",
+
+                                incidentType:
+                                    "KUBERNETES_EVENT_PROCESSING_FAILURE",
 
                                 resourceName,
 
@@ -169,23 +191,26 @@ export async function startResourceWatcher<
             (err) => {
 
 
+
                 logger.error(
                     {
+                        event: "kubernetes_watch_failed",
+
                         err,
-
-                        service:
-                            "kubernetes-watcher",
-
-                        component:
-                            "kubernetes-watch",
-
-                        incidentType:
-                            "KUBERNETES_WATCH_FAILURE",
 
 
                         metadata: {
+
+                            component:
+                                "kubernetes-watch",
+
+                            incidentType:
+                                "KUBERNETES_WATCH_FAILURE",
+
                             resourceName,
+
                             path
+
                         }
 
                     },
@@ -199,28 +224,37 @@ export async function startResourceWatcher<
         );
 
 
+
     } catch (error) {
+
 
 
         logger.fatal(
             {
+                event: "kubernetes_watch_start_failed",
+
                 err: error,
 
-                service:
-                    "kubernetes-watcher",
-
-                incidentType:
-                    "KUBERNETES_WATCH_START_FAILURE",
 
                 metadata: {
+
+                    component:
+                        "kubernetes-watch",
+
+                    incidentType:
+                        "KUBERNETES_WATCH_START_FAILURE",
+
                     resourceName,
+
                     path
+
                 }
 
             },
 
             "Failed to start Kubernetes watcher"
         );
+
 
 
         throw error;

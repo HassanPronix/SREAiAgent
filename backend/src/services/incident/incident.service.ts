@@ -11,10 +11,10 @@ export class IncidentService {
         payload: any
     ) {
 
-
         try {
 
-            let isIncident = false; 
+            let isIncident = false;
+
 
             switch (topic) {
 
@@ -30,13 +30,17 @@ export class IncidentService {
 
                     break;
 
+
                 case "metric-anomalies":
 
-                    if (payload.severity === "CRITICAL") {
+                    if (
+                        payload.severity === "CRITICAL"
+                    ) {
                         isIncident = true;
                     }
 
                     break;
+
 
                 case "pod-events":
 
@@ -51,6 +55,7 @@ export class IncidentService {
 
                     break;
 
+
                 case "node-events":
 
                     if ([
@@ -64,46 +69,68 @@ export class IncidentService {
 
                     break;
 
+
                 case "deployment-events":
 
-                    if (payload.status === "FAILED") {
-
+                    if (
+                        payload.status === "FAILED"
+                    ) {
                         isIncident = true;
-
                     }
 
                     break;
             }
 
+
+
             if (!isIncident) {
+
 
                 logger.debug(
                     {
-                        topic,
-                        event:
-                            payload.reason ||
-                            payload.level ||
-                            "unknown"
+                        event: "incident_event_ignored",
+
+                        metadata: {
+                            topic,
+
+                            reason:
+                                payload.reason ||
+                                payload.level ||
+                                "unknown"
+                        }
                     },
 
                     "Event ignored, not an incident"
                 );
 
+
                 return;
             }
+
+
 
             const incident = {
 
 
-                incidentId: crypto.randomUUID(),
+                incidentId:
+                    crypto.randomUUID(),
 
-                title: `${topic} incident`,
 
-                severity: "CRITICAL" as const,
+                title:
+                    `${topic} incident`,
 
-                status: "OPEN" as const,
 
-                source: topic,
+                severity:
+                    "CRITICAL" as const,
+
+
+                status:
+                    "OPEN" as const,
+
+
+                source:
+                    topic,
+
 
                 resourceName:
                     payload.resourceName ||
@@ -112,8 +139,10 @@ export class IncidentService {
                     payload.deployment ||
                     "",
 
+
                 namespace:
                     payload.namespace || "",
+
 
                 message:
                     payload.message ||
@@ -121,33 +150,46 @@ export class IncidentService {
                     payload.error ||
                     "",
 
+
                 occurredAt:
                     payload.timestamp
                         ? new Date(payload.timestamp)
                         : new Date(),
 
+
                 rawEvent:
                     payload,
 
-                aiAnalysis: null,
+
+                aiAnalysis:
+                    null,
 
             };
 
 
+
             logger.warn(
                 {
-                    incidentId: incident.incidentId,
+                    event: "incident_detected",
 
-                    topic,
+                    metadata: {
 
-                    resource: incident.resourceName,
+                        incidentId:
+                            incident.incidentId,
 
-                    namespace: incident.namespace
+                        topic,
 
+                        resource:
+                            incident.resourceName,
+
+                        namespace:
+                            incident.namespace
+                    }
                 },
 
                 "Incident detected"
             );
+
 
 
             const similarIncidents =
@@ -156,32 +198,49 @@ export class IncidentService {
                 );
 
 
+
             logger.info(
                 {
-                    incidentId:
-                        incident.incidentId,
+                    event: "similar_incidents_search_completed",
 
-                    similarCount:
-                        similarIncidents.length
+                    metadata: {
 
+                        incidentId:
+                            incident.incidentId,
+
+                        similarCount:
+                            similarIncidents.length
+                    }
                 },
 
                 "Similar incidents search completed"
             );
 
-            const analysis = await RCAService.analyze(incident, similarIncidents);
+
+
+            const analysis =
+                await RCAService.analyze(
+                    incident,
+                    similarIncidents
+                );
+
+
 
             logger.info(
                 {
-                    incidentId:
-                        incident.incidentId,
+                    event: "rca_analysis_completed",
 
-                    confidence:
-                        analysis.confidence,
+                    metadata: {
 
-                    rootCause:
-                        analysis.rootCause
+                        incidentId:
+                            incident.incidentId,
 
+                        confidence:
+                            analysis.confidence,
+
+                        rootCause:
+                            analysis.rootCause
+                    }
                 },
 
                 "RCA analysis completed"
@@ -191,18 +250,14 @@ export class IncidentService {
 
             const enrichedIncident = {
 
-
                 ...incident,
-
 
                 aiAnalysis:
                     analysis,
 
-
                 similarIncidents
 
             };
-
 
 
 
@@ -214,8 +269,13 @@ export class IncidentService {
 
             logger.info(
                 {
-                    incidentId:
-                        incident.incidentId
+                    event: "incident_stored",
+
+                    metadata: {
+
+                        incidentId:
+                            incident.incidentId
+                    }
                 },
 
                 "Incident stored successfully"
@@ -228,18 +288,18 @@ export class IncidentService {
 
             logger.error(
                 {
+                    event: "incident_processing_failed",
+
                     err: error,
 
-                    service:
-                        "incident-service",
-
-                    component:
-                        "incident-processing",
-
-                    incidentType:
-                        "INCIDENT_PROCESSING_FAILURE",
-
                     metadata: {
+
+                        component:
+                            "incident-processing",
+
+                        incidentType:
+                            "INCIDENT_PROCESSING_FAILURE",
+
                         topic
                     }
 

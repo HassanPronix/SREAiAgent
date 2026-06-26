@@ -19,9 +19,14 @@ export async function startRawLogConsumer() {
 
     logger.info(
       {
-        service: "raw-log-consumer",
-        groupId: "raw-log-group"
+        event: "raw_log_consumer_connected",
+
+        metadata: {
+          component: "fluentbit-ingestion",
+          groupId: "raw-log-group"
+        }
       },
+
       "Raw log consumer connected"
     );
 
@@ -32,10 +37,16 @@ export async function startRawLogConsumer() {
     );
 
 
+
     logger.info(
       {
-        topic: TOPICS.RAW_LOGS
+        event: "raw_log_topic_subscribed",
+
+        metadata: {
+          topic: TOPICS.RAW_LOGS
+        }
       },
+
       "Subscribed to raw logs topic"
     );
 
@@ -55,16 +66,19 @@ export async function startRawLogConsumer() {
 
         logger.debug(
           {
-            topic: TOPICS.RAW_LOGS,
+            event: "fluentbit_log_received",
 
-            receivedAt,
+            metadata: {
+              topic: TOPICS.RAW_LOGS,
 
-            source:
-              payload.service ||
-              payload.container ||
-              payload.tag ||
-              "unknown"
+              source:
+                payload.service ||
+                payload.container ||
+                payload.tag ||
+                "unknown",
 
+              receivedAt
+            }
           },
 
           "Raw log received"
@@ -85,15 +99,19 @@ export async function startRawLogConsumer() {
 
         logger.info(
           {
-            topic: TOPICS.RAW_LOGS,
+            event: "raw_log_stored",
 
-            source:
-              normalized.source ||
-              "unknown",
+            metadata: {
+              topic: TOPICS.RAW_LOGS,
 
-            severity:
-              normalized.severity ||
-              "unknown"
+              source:
+                normalized.source ||
+                "unknown",
+
+              severity:
+                normalized.severity ||
+                "unknown"
+            }
           },
 
           "Raw log stored"
@@ -106,18 +124,18 @@ export async function startRawLogConsumer() {
 
         logger.error(
           {
+            event: "raw_log_processing_failed",
+
             err: error,
 
-            service: "raw-log-consumer",
-
-            component:
-              "fluentbit-ingestion",
-
-            incidentType:
-              "RAW_LOG_PROCESSING_FAILURE",
-
             metadata: {
+              component: "fluentbit-ingestion",
+
+              incidentType:
+                "RAW_LOG_PROCESSING_FAILURE",
+
               topic: TOPICS.RAW_LOGS,
+
               receivedAt
             }
 
@@ -137,15 +155,18 @@ export async function startRawLogConsumer() {
 
     logger.fatal(
       {
+        event: "raw_log_consumer_start_failed",
+
         err: error,
 
-        service: "raw-log-consumer",
+        metadata: {
+          component: "fluentbit-ingestion",
 
-        component:
-          "fluentbit-ingestion",
+          incidentType:
+            "RAW_LOG_CONSUMER_START_FAILURE",
 
-        incidentType:
-          "RAW_LOG_CONSUMER_START_FAILURE"
+          groupId: "raw-log-group"
+        }
       },
 
       "Raw log consumer failed to start"

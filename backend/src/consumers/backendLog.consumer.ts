@@ -19,10 +19,15 @@ export async function startBackendLogConsumer() {
 
         logger.info(
             {
-                service: "kafka-consumer",
-                topic: TOPICS.BACKEND_LOGS,
-                groupId: "backend-log-group"
+                event: "kafka_consumer_connected",
+
+                metadata: {
+                    component: "backend-log-consumer",
+                    topic: TOPICS.BACKEND_LOGS,
+                    groupId: "backend-log-group"
+                }
             },
+
             "Kafka consumer connected"
         );
 
@@ -34,8 +39,13 @@ export async function startBackendLogConsumer() {
 
         logger.info(
             {
-                topic: TOPICS.BACKEND_LOGS
+                event: "kafka_topic_subscribed",
+
+                metadata: {
+                    topic: TOPICS.BACKEND_LOGS
+                }
             },
+
             "Subscribed to backend logs topic"
         );
 
@@ -52,14 +62,21 @@ export async function startBackendLogConsumer() {
 
                 logger.debug(
                     {
-                        topic: TOPICS.BACKEND_LOGS,
-                        messageSize: JSON.stringify(payload).length
+                        event: "backend_log_received",
+
+                        metadata: {
+                            topic: TOPICS.BACKEND_LOGS,
+                            messageSize:
+                                JSON.stringify(payload).length
+                        }
                     },
+
                     "Backend log message received"
                 );
 
 
-                const normalized = normalizeBackendLog(payload);
+                const normalized =
+                    normalizeBackendLog(payload);
 
 
 
@@ -69,13 +86,17 @@ export async function startBackendLogConsumer() {
 
                 logger.info(
                     {
-                        topic: TOPICS.BACKEND_LOGS,
+                        event: "backend_log_stored",
 
-                        service: normalized.service || "unknown",
-
-                        severity: normalized.severity || "unknown",
-
+                        metadata: {
+                            topic: TOPICS.BACKEND_LOGS,
+                            service:
+                                normalized.service ?? "unknown",
+                            severity:
+                                normalized.severity ?? "unknown"
+                        }
                     },
+
                     "Backend log stored in MongoDB"
                 );
 
@@ -85,15 +106,14 @@ export async function startBackendLogConsumer() {
 
                 logger.error(
                     {
+                        event: "backend_log_processing_failed",
+
                         err: error,
 
-                        service: "kafka-consumer",
-
-                        component: "backend-log-consumer",
-
-                        incidentType: "BACKEND_LOG_PROCESSING_FAILURE",
-
                         metadata: {
+                            component: "backend-log-consumer",
+                            incidentType:
+                                "BACKEND_LOG_PROCESSING_FAILURE",
                             topic: TOPICS.BACKEND_LOGS,
                             receivedAt
                         }
@@ -112,15 +132,14 @@ export async function startBackendLogConsumer() {
 
         logger.fatal(
             {
+                event: "kafka_consumer_start_failed",
+
                 err: error,
 
-                service: "kafka-consumer",
-
-                component: "backend-log-consumer",
-
-                incidentType: "KAFKA_CONSUMER_START_FAILURE",
-
                 metadata: {
+                    component: "backend-log-consumer",
+                    incidentType:
+                        "KAFKA_CONSUMER_START_FAILURE",
                     groupId: "backend-log-group",
                     topic: TOPICS.BACKEND_LOGS
                 }

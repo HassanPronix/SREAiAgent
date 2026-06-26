@@ -12,32 +12,32 @@ export const errorHandler = (
 
   logger.error(
     {
+      event: "http_request_failed",
+
+      requestId: req.requestId,
+
+      traceId: req.traceId,
+
       err,
-
-      service: "api",
-
-      component: "express-error-handler",
-
-      incidentType:
-        "HTTP_REQUEST_FAILURE",
-
-
-      request: {
-
-        method: req.method,
-
-        url: req.originalUrl,
-
-        ip: req.ip,
-
-      },
-
 
       metadata: {
 
-        requestId: req.requestId,
+        component:
+          "express-error-handler",
 
-        traceId: req.traceId,
+        incidentType:
+          "HTTP_REQUEST_FAILURE",
+
+
+        request: {
+
+          method: req.method,
+
+          url: req.originalUrl,
+
+          ip: req.ip,
+
+        }
 
       }
 

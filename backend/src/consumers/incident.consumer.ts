@@ -18,9 +18,14 @@ export async function startIncidentConsumer() {
 
         logger.info(
             {
-                service: "incident-consumer",
-                groupId: "incident-detector-group"
+                event: "incident_consumer_connected",
+
+                metadata: {
+                    component: "incident-detector",
+                    groupId: "incident-detector-group"
+                }
             },
+
             "Incident consumer connected"
         );
 
@@ -36,14 +41,21 @@ export async function startIncidentConsumer() {
 
         logger.info(
             {
-                topics: [
-                    TOPICS.BACKEND_LOGS,
-                    TOPICS.METRIC_ANOMALIES,
-                    TOPICS.POD_EVENTS,
-                    TOPICS.NODE_EVENTS,
-                    TOPICS.DEPLOYMENT_EVENTS,
-                ]
+                event: "incident_consumer_subscribed",
+
+                metadata: {
+                    component: "incident-detector",
+
+                    topics: [
+                        TOPICS.BACKEND_LOGS,
+                        TOPICS.METRIC_ANOMALIES,
+                        TOPICS.POD_EVENTS,
+                        TOPICS.NODE_EVENTS,
+                        TOPICS.DEPLOYMENT_EVENTS,
+                    ]
+                }
             },
+
             "Incident consumer subscribed"
         );
 
@@ -63,14 +75,19 @@ export async function startIncidentConsumer() {
 
                 logger.debug(
                     {
-                        topic,
-                        receivedAt,
+                        event: "incident_event_received",
 
-                        eventType:
-                            payload.type ||
-                            payload.reason ||
-                            payload.level ||
-                            "unknown"
+                        metadata: {
+                            topic,
+
+                            eventType:
+                                payload.type ||
+                                payload.reason ||
+                                payload.level ||
+                                "unknown",
+
+                            receivedAt
+                        }
                     },
 
                     "Incident event received"
@@ -87,10 +104,12 @@ export async function startIncidentConsumer() {
 
                 logger.info(
                     {
-                        topic,
+                        event: "incident_event_processed",
 
-                        incidentProcessor:
-                            "completed"
+                        metadata: {
+                            topic,
+                            processor: "completed"
+                        }
                     },
 
                     "Incident event processed"
@@ -103,17 +122,16 @@ export async function startIncidentConsumer() {
 
                 logger.error(
                     {
+                        event: "incident_processing_failed",
+
                         err: error,
 
-                        service: "incident-consumer",
-
-                        component:
-                            "incident-detector",
-
-                        incidentType:
-                            "INCIDENT_PROCESSING_FAILURE",
-
                         metadata: {
+                            component: "incident-detector",
+
+                            incidentType:
+                                "INCIDENT_PROCESSING_FAILURE",
+
                             topic,
                             receivedAt
                         }
@@ -132,14 +150,16 @@ export async function startIncidentConsumer() {
 
         logger.fatal(
             {
+                event: "incident_consumer_start_failed",
+
                 err: error,
 
-                service: "incident-consumer",
+                metadata: {
+                    component: "incident-detector",
 
-                component: "incident-detector",
-
-                incidentType:
-                    "INCIDENT_CONSUMER_START_FAILURE"
+                    incidentType:
+                        "INCIDENT_CONSUMER_START_FAILURE"
+                }
             },
 
             "Incident consumer failed to start"

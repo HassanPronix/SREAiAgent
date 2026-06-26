@@ -8,55 +8,94 @@ export const requestLogger = (
   next: NextFunction
 ) => {
 
-  const start = Date.now();
+
+  const start =
+    Date.now();
+
 
 
   res.on("finish", () => {
+
 
     const duration =
       Date.now() - start;
 
 
-    const payload = {
 
-      requestId: req.requestId,
+    const logPayload = {
 
-      traceId: req.traceId,
+      event: "http_request_completed",
 
-      method: req.method,
+      requestId:
+        req.requestId,
 
-      path: req.originalUrl,
+      traceId:
+        req.traceId,
 
-      statusCode: res.statusCode,
 
-      duration,
+      metadata: {
 
-      service:
-        process.env.SERVICE_NAME ||
-        "sre-aiops-backend"
+        method:
+          req.method,
+
+        path:
+          req.originalUrl,
+
+        statusCode:
+          res.statusCode,
+
+        duration
+
+      }
 
     };
 
+
+
     if (res.statusCode >= 500) {
 
+
       logger.error(
-        payload,
+        {
+          ...logPayload,
+
+          event:
+            "http_request_failed"
+        },
+
         "HTTP request failed"
       );
 
-    }
-    else if (res.statusCode >= 400) {
 
-      logger.warn(payload, "HTTP request warning");
+    } else if (res.statusCode >= 400) {
 
-    }
-    else {
 
-      logger.info(payload, "HTTP request completed");
+      logger.warn(
+        {
+          ...logPayload,
+
+          event:
+            "http_request_warning"
+        },
+
+        "HTTP request warning"
+      );
+
+
+    } else {
+
+
+      logger.info(
+        logPayload,
+
+        "HTTP request completed"
+      );
+
     }
 
   });
 
+  
 
   next();
 };

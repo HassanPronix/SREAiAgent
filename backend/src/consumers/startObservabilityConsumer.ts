@@ -18,10 +18,15 @@ export async function startObservabilityConsumer(
 
     logger.info(
       {
-        service: "observability-consumer",
-        topic,
-        groupId
+        event: "observability_consumer_connected",
+
+        metadata: {
+          component: "event-ingestion",
+          topic,
+          groupId
+        }
       },
+
       "Observability consumer connected"
     );
 
@@ -33,9 +38,14 @@ export async function startObservabilityConsumer(
 
     logger.info(
       {
-        topic,
-        groupId
+        event: "observability_topic_subscribed",
+
+        metadata: {
+          topic,
+          groupId
+        }
       },
+
       "Subscribed to observability topic"
     );
 
@@ -55,15 +65,20 @@ export async function startObservabilityConsumer(
 
         logger.debug(
           {
-            topic,
+            event: "observability_event_received",
 
-            eventType:
-              payload.type ||
-              payload.reason ||
-              payload.kind ||
-              "unknown",
+            metadata: {
 
-            receivedAt
+              topic,
+
+              eventType:
+                payload.type ||
+                payload.reason ||
+                payload.kind ||
+                "unknown",
+
+              receivedAt
+            }
           },
 
           "Observability event received"
@@ -79,15 +94,20 @@ export async function startObservabilityConsumer(
 
         logger.info(
           {
-            topic,
+            event: "observability_event_stored",
 
-            eventType:
-              payload.type ||
-              payload.reason ||
-              payload.kind ||
-              "unknown",
+            metadata: {
 
-            stored: true
+              topic,
+
+              eventType:
+                payload.type ||
+                payload.reason ||
+                payload.kind ||
+                "unknown",
+
+              stored: true
+            }
           },
 
           "Observability event stored"
@@ -99,18 +119,18 @@ export async function startObservabilityConsumer(
 
         logger.error(
           {
+            event: "observability_event_processing_failed",
+
             err: error,
 
-            service:
-              "observability-consumer",
-
-            component:
-              "event-ingestion",
-
-            incidentType:
-              "OBSERVABILITY_EVENT_PROCESSING_FAILURE",
-
             metadata: {
+
+              component:
+                "event-ingestion",
+
+              incidentType:
+                "OBSERVABILITY_EVENT_PROCESSING_FAILURE",
+
               topic,
               groupId,
               receivedAt
@@ -131,18 +151,18 @@ export async function startObservabilityConsumer(
 
     logger.fatal(
       {
+        event: "observability_consumer_start_failed",
+
         err: error,
 
-        service:
-          "observability-consumer",
-
-        component:
-          "event-ingestion",
-
-        incidentType:
-          "OBSERVABILITY_CONSUMER_START_FAILURE",
-
         metadata: {
+
+          component:
+            "event-ingestion",
+
+          incidentType:
+            "OBSERVABILITY_CONSUMER_START_FAILURE",
+
           topic,
           groupId
         }

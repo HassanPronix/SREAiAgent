@@ -1,8 +1,8 @@
-import { LogModel } from "../models/log.model.js";
+import { BackendLogModel } from "../models/backendLog.model.js";
 
 class LogRepository {
   async create(payload: any) {
-    return LogModel.create(payload);
+    return BackendLogModel.create(payload);
   }
 }
 

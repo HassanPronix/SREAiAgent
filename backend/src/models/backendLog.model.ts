@@ -35,7 +35,7 @@ LogSchema.index({ service: 1 });
 LogSchema.index({ requestId: 1 });
 LogSchema.index({ traceId: 1 });
 
-export const LogModel = model(
-    "Log",
+export const BackendLogModel = model(
+    "backendLog",
     LogSchema
 );

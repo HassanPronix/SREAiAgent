@@ -15,52 +15,68 @@ import { initializeVectorStore } from "./services/qdrant/vector-store.service.js
 const PORT = Number(process.env.PORT) || 5000;
 
 async function bootstrap() {
+
+  logger.info({ event: "bootstrap_started", component: "server", port: PORT, }, "Starting backend service");
+
   try {
 
-    await connectDB();
+    await Promise.all([
+      connectDB(),
+      producerService.connect(),
+      initializeVectorStore()
+    ]);
 
-    await producerService.connect();
+    // connect all kafka consumers
+    await Promise.all([
 
-    await initializeVectorStore();
+      startIncidentConsumer(),
 
-    await startBackendLogConsumer();
-    await startRawLogConsumer();
+      startBackendLogConsumer(),
+      startRawLogConsumer(),
+      startMetricConsumer(),
 
-    // uncomment these two line for metrics 
-    await startMetricConsumer();
-    startMetricsCollector()
+      // startObservabilityConsumer(TOPICS.K8S_EVENTS, "k8s-event-group"),
+      // startObservabilityConsumer(TOPICS.POD_EVENTS, "pod-event-group"),
+      // startObservabilityConsumer(TOPICS.DEPLOYMENT_EVENTS, "deployment-event-group"),
+      // startObservabilityConsumer(TOPICS.NODE_EVENTS, "node-event-group"),
+    ]);
 
-    // K8s event, deployment, pod watcher and consumer
-
-    // uncomment below code for k8s observability
-    // startWatchers()
-
-    // await startObservabilityConsumer(TOPICS.K8S_EVENTS, "k8s-event-group");
-    // await startObservabilityConsumer(TOPICS.POD_EVENTS, "pod-event-group");
-    // await startObservabilityConsumer(TOPICS.DEPLOYMENT_EVENTS, "deployment-event-group");
-    // await startObservabilityConsumer(TOPICS.NODE_EVENTS, "node-event-group");
-
-    startIncidentConsumer()
+    startMetricsCollector();
+    // Enable Kubernetes watchers when required
+    // startWatchers();
 
     const server = app.listen(PORT, "0.0.0.0", () => {
-      logger.info(`Server running on ${PORT}`);
+
+      logger.info({ event: "server_started", component: "http", port: PORT, host: "0.0.0.0", }, "HTTP server running");
+
     });
 
     process.on("SIGINT", async () => {
-      logger.info("Shutting down");
+
+      logger.info({ event: "shutdown_started", signal: "SIGINT", }, "Graceful shutdown initiated");
 
       await producerService.disconnect();
 
+      logger.info({ event: "kafka_disconnected", component: "kafka", }, "Kafka producer disconnected");
+
       server.close(() => {
+
+        logger.info({ event: "server_stopped", }, "HTTP server stopped");
+
         process.exit(0);
+
       });
+
     });
 
+
   } catch (error) {
-    logger.error(error);
+
+    logger.error({ event: "bootstrap_failed", component: "server", err: error, }, "Backend startup failed");
 
     process.exit(1);
   }
 }
+
 
 bootstrap();

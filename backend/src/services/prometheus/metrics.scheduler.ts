@@ -8,35 +8,94 @@ import { logger } from "../../config/logger.js";
 
 export function startMetricsCollector() {
 
-    cron.schedule("*/1 * * * *", async () => {
 
-        try {
+    logger.info(
+        {
+            service: "metrics-collector",
+            interval: "1 minute"
+        },
+        "Metrics collector started"
+    );
 
 
-            // TODO: update this for memory and other metrics as well
-            const cpuResults = await prometheusService.query(
-                "sum(rate(container_cpu_usage_seconds_total[5m])) by (pod)" // "sum(rate(container_cpu_usage_seconds_total[5m])) by (name)" // change by (name) to by (pod) in k8s
-            );
+
+    cron.schedule(
+        "*/1 * * * *",
+
+        async () => {
 
 
-            // console.log('cpu results -->', cpuResults)
-            await producerService.publish(
-                TOPICS.METRICS,
-                {
-                    metricName: "cpu_usage",
-                    timestamp: new Date(),
-                    data: cpuResults
-                }
-            );
+            const startedAt =
+                Date.now();
 
-            logger.info("Published raw CPU metrics");
 
-        } catch (error) {
 
-            logger.error(error);
+            try {
 
+
+                const cpuResults = await prometheusService.query("sum(rate(container_cpu_usage_seconds_total[5m])) by (name)"
+                );
+
+                await producerService.publish(
+
+                    TOPICS.METRICS,
+
+                    {
+                        metricName:
+                            "cpu_usage",
+
+                        timestamp:
+                            new Date(),
+
+                        data:
+                            cpuResults
+                    }
+
+                );
+
+                logger.info(
+                    {
+                        service: "metrics-collector",
+
+                        metric: "cpu_usage",
+
+                        duration: Date.now() - startedAt,
+
+                        topic: TOPICS.METRICS
+
+                    },
+
+                    "Metrics collected and published"
+                );
+
+
+
+            } catch (error) {
+
+                logger.error(
+                    {
+                        err: error,
+
+                        service: "metrics-collector",
+
+                        component: "prometheus-collector",
+
+                        incidentType: "METRICS_COLLECTION_FAILURE",
+
+                        metadata: {
+
+                            metric: "cpu_usage",
+
+                            topic: TOPICS.METRICS
+
+                        }
+                    },
+
+                    "Failed to collect metrics"
+                );
+
+            }
         }
-
-    });
+    );
 
 }

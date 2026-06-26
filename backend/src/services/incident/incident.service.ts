@@ -1,65 +1,258 @@
-
+import { logger } from "../../config/logger.js";
+import incidentModel from "../../models/incident.model.js";
 import crypto from "crypto";
+import { SimilarityService } from "../qdrant/similarity.service.js";
+import { RCAService } from "../llm/rca.service.js";
 
-import { fetchRecentEvents } from "./correlation.service.js";
+export class IncidentService {
 
-import {
-    detectDeploymentRegression,
-    detectMemoryLeak,
-    detectPodInstability,
-} from "./incident-rules.service.js";
+    static async processEvent(
+        topic: string,
+        payload: any
+    ) {
 
-import { incidentRepository }
-    from "../../repositories/incident.repository.js";
 
-export async function generateIncidents() {
+        try {
 
-    const events = await fetchRecentEvents();
+            let isIncident = false; 
 
-    const rules = [
-        detectDeploymentRegression,
-        detectMemoryLeak,
-        detectPodInstability,
-    ];
+            switch (topic) {
 
-    for (const rule of rules) {
 
-        const incident = rule(events);
+                case "backend-logs":
 
-        if (!incident) continue;
+                    if (
+                        payload.level === "error" ||
+                        payload.level === "fatal"
+                    ) {
+                        isIncident = true;
+                    }
 
-        const existing = await incidentRepository.findOpenIncident(events[0]?.namespace, events[0]?.service);
+                    break;
 
-        if (existing) continue;
+                case "metric-anomalies":
 
-        await incidentRepository.create({
-            incidentId: crypto.randomUUID(),
+                    if (payload.severity === "CRITICAL") {
+                        isIncident = true;
+                    }
 
-            ...incident,
+                    break;
 
-            namespace: events[0]?.namespace,
+                case "pod-events":
 
-            service: events[0]?.service,
+                    if ([
+                        "CrashLoopBackOff",
+                        "OOMKilled",
+                        "FailedScheduling",
+                    ].includes(payload.reason)) {
 
-            startedAt: new Date(),
+                        isIncident = true;
+                    }
 
-            relatedEventIds: events.map(e => e._id),
-        });
+                    break;
 
-        //TODO:  send email to SRE and also socket.io notificaiont to frontend with incident after sending incident, search similarity and if found generate recommendation and send to frontend
-        
+                case "node-events":
+
+                    if ([
+                        "NodeNotReady",
+                        "MemoryPressure",
+                        "DiskPressure",
+                    ].includes(payload.reason)) {
+
+                        isIncident = true;
+                    }
+
+                    break;
+
+                case "deployment-events":
+
+                    if (payload.status === "FAILED") {
+
+                        isIncident = true;
+
+                    }
+
+                    break;
+            }
+
+            if (!isIncident) {
+
+                logger.debug(
+                    {
+                        topic,
+                        event:
+                            payload.reason ||
+                            payload.level ||
+                            "unknown"
+                    },
+
+                    "Event ignored, not an incident"
+                );
+
+                return;
+            }
+
+            const incident = {
+
+
+                incidentId: crypto.randomUUID(),
+
+                title: `${topic} incident`,
+
+                severity: "CRITICAL" as const,
+
+                status: "OPEN" as const,
+
+                source: topic,
+
+                resourceName:
+                    payload.resourceName ||
+                    payload.pod ||
+                    payload.node ||
+                    payload.deployment ||
+                    "",
+
+                namespace:
+                    payload.namespace || "",
+
+                message:
+                    payload.message ||
+                    payload.reason ||
+                    payload.error ||
+                    "",
+
+                occurredAt:
+                    payload.timestamp
+                        ? new Date(payload.timestamp)
+                        : new Date(),
+
+                rawEvent:
+                    payload,
+
+                aiAnalysis: null,
+
+            };
+
+
+            logger.warn(
+                {
+                    incidentId: incident.incidentId,
+
+                    topic,
+
+                    resource: incident.resourceName,
+
+                    namespace: incident.namespace
+
+                },
+
+                "Incident detected"
+            );
+
+
+            const similarIncidents =
+                await SimilarityService.findSimilarIncidents(
+                    payload
+                );
+
+
+            logger.info(
+                {
+                    incidentId:
+                        incident.incidentId,
+
+                    similarCount:
+                        similarIncidents.length
+
+                },
+
+                "Similar incidents search completed"
+            );
+
+            const analysis = await RCAService.analyze(incident, similarIncidents);
+
+            logger.info(
+                {
+                    incidentId:
+                        incident.incidentId,
+
+                    confidence:
+                        analysis.confidence,
+
+                    rootCause:
+                        analysis.rootCause
+
+                },
+
+                "RCA analysis completed"
+            );
+
+
+
+            const enrichedIncident = {
+
+
+                ...incident,
+
+
+                aiAnalysis:
+                    analysis,
+
+
+                similarIncidents
+
+            };
+
+
+
+
+            await incidentModel.create(
+                enrichedIncident
+            );
+
+
+
+            logger.info(
+                {
+                    incidentId:
+                        incident.incidentId
+                },
+
+                "Incident stored successfully"
+            );
+
+
+
+        } catch (error) {
+
+
+            logger.error(
+                {
+                    err: error,
+
+                    service:
+                        "incident-service",
+
+                    component:
+                        "incident-processing",
+
+                    incidentType:
+                        "INCIDENT_PROCESSING_FAILURE",
+
+                    metadata: {
+                        topic
+                    }
+
+                },
+
+                "Failed to process incident"
+
+            );
+
+
+            throw error;
+        }
+
     }
+
 }
-
-// const incident = await IncidentModel.findByIdAndUpdate(
-//     id,
-//     {
-//         status: "RESOLVED",
-//         rootCause,
-//         recommendation,
-//         resolvedAt: new Date()
-//     },
-//     { new: true }
-// );
-
-// await storeResolvedIncident(incident);

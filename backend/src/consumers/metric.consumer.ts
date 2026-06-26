@@ -12,19 +12,19 @@ export async function startMetricConsumer() {
 
   await consumer.connect();
 
-  await consumer.subscribe(
-    TOPICS.METRICS
+  await consumer.subscribe([TOPICS.METRICS]
   );
 
-  await consumer.run(async (message) => {
+  await consumer.run(async (_, message) => {
 
+    // console.log('metric -->', message)
     const payload = JSON.parse(message);
 
     const normalizedMetrics = normalizePrometheusMetric(payload.metricName, payload.data);
 
-    for (const metric of normalizedMetrics) {
+    // console.log('normalizedMetric -->', JSON.stringify(normalizedMetrics, null, 2))
 
-      console.log('metric -->', metric)
+    for (const metric of normalizedMetrics) {
 
       await metricRepository.create({ ...metric, timestamp: payload.timestamp });
 

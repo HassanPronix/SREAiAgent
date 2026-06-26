@@ -1,73 +1,88 @@
-import { Schema, model } from "mongoose";
+import mongoose from "mongoose";
 
-const IncidentSchema = new Schema(
+
+const AIAnalysisSchema = new mongoose.Schema(
     {
-        incidentId: {
+        summary: {
             type: String,
-            required: true,
-            unique: true,
-            index: true,
+            default: ""
         },
 
-        title: {
+        rootCause: {
             type: String,
-            required: true,
+            default: ""
         },
 
-        description: String,
+        remediation: {
+            type: [String],
+            default: []
+        },
+
+        confidence: {
+            type: Number,
+            default: 0
+        },
+
+        explanation: {
+            type: String,
+            default: ""
+        }
+    },
+    {
+        _id: false
+    }
+);
+
+
+const IncidentSchema = new mongoose.Schema(
+    {
+
+        incidentId: String,
+
+        title: String,
 
         severity: {
             type: String,
-            enum: ["LOW", "MEDIUM", "HIGH", "CRITICAL"],
-            required: true,
+            enum: ["INFO", "WARNING", "CRITICAL"]
         },
 
         status: {
             type: String,
-            enum: ["OPEN", "INVESTIGATING", "RESOLVED"],
-            default: "OPEN",
+            enum: ["OPEN", "CLOSED"]
         },
+
+        source: String,
+
+        resourceName: String,
 
         namespace: String,
 
-        service: String,
+        message: String,
 
-        cluster: String,
+        occurredAt: Date,
 
-        probableRootCause: String,
+        rawEvent: Object,
 
-        recommendation: String,
 
-        startedAt: {
-            type: Date,
-            required: true,
+        aiAnalysis: {
+            type: AIAnalysisSchema,
+            default: null
         },
 
-        resolvedAt: Date,
 
-        relatedEventIds: [
-            {
-                type: Schema.Types.ObjectId,
-                ref: "ObservabilityEvent",
-            },
-        ],
+        similarIncidents: {
+            type: Array,
+            default: []
+        }
 
-        metadata: {
-            type: Schema.Types.Mixed,
-            default: {},
-        },
     },
     {
-        timestamps: true,
+        timestamps: true
     }
 );
 
-IncidentSchema.index({
-    status: 1,
-    namespace: 1,
-});
 
-export const IncidentModel = model(
+export default mongoose.model(
     "Incident",
     IncidentSchema
 );

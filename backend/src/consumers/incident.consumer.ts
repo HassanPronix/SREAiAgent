@@ -1,7 +1,7 @@
 import { ConsumerService } from '../services/kafka/consumer.service.js';
 import { TOPICS } from '../services/kafka/topics.js';
 import { logger } from '../config/logger.js';
-import { IncidentService } from '../services/incident/incident.service.js';
+import  IncidentService  from '../services/incident/incident.service.js';
 
 const consumer = new ConsumerService('incident-detector-group');
 

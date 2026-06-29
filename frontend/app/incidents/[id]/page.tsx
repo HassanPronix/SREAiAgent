@@ -5,6 +5,7 @@ import RecentLogs from "@/components/incident-details/RecentLogs";
 import SimilarIncidents from "@/components/incident-details/SimilarIncidents";
 import RecommendationsPanel from "@/components/incident-details/RecommendationsPanel";
 import TimelinePanel from "@/components/incident-details/TimelinePanel";
+import SREResolutionForm from "@/components/incident-details/SREResolutionForm";
 
 export default function IncidentDetailPage() {
     return (
@@ -24,6 +25,8 @@ export default function IncidentDetailPage() {
             <RecommendationsPanel />
 
             <TimelinePanel />
+
+            <SREResolutionForm />
         </div>
     );
 }

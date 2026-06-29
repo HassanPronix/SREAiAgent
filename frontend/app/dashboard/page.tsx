@@ -1,4 +1,8 @@
 import StatsCards from "@/components/dashboard/StatsCard";
+import IncidentTimeline from "@/components/dashboard/IncidentTimeline";
+import ClusterHealth from "@/components/dashboard/ClusterHealth";
+import RecommendationsFeed from "@/components/dashboard/RecommendationsFeed";
+import DeploymentActivity from "@/components/dashboard/DeploymentActivity";
 
 export default function DashboardPage() {
     return (
@@ -6,23 +10,13 @@ export default function DashboardPage() {
             <StatsCards />
 
             <div className="grid gap-6 lg:grid-cols-2">
-                <div className="h-80 rounded-xl border p-4">
-                    Incident Timeline
-                </div>
-
-                <div className="h-80 rounded-xl border p-4">
-                    Cluster Health
-                </div>
+                <IncidentTimeline />
+                <ClusterHealth />
             </div>
 
             <div className="grid gap-6 lg:grid-cols-2">
-                <div className="h-80 rounded-xl border p-4">
-                    AI Recommendations
-                </div>
-
-                <div className="h-80 rounded-xl border p-4">
-                    Deployment Activity
-                </div>
+                <RecommendationsFeed />
+                <DeploymentActivity />
             </div>
         </div>
     );

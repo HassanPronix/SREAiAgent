@@ -3,8 +3,9 @@ import incidentModel from '../../models/incident.model.js';
 import crypto from 'crypto';
 import { SimilarityService } from '../qdrant/similarity.service.js';
 import { RCAService } from '../llm/rca.service.js';
+import IncidentRepository from '../../repositories/IncidentRepository.js';
 
-export class IncidentService {
+class IncidentService {
   static async processEvent(topic: string, payload: any) {
     try {
       let isIncident = true;
@@ -184,4 +185,42 @@ export class IncidentService {
       throw error;
     }
   }
+
+  async getIncident(incidentId: string) {
+    const incident = await IncidentRepository.findByIncidentId(incidentId);
+
+    if (!incident) {
+      throw new Error('Incident not found');
+    }
+
+    return incident;
+  }
+
+  async updateSREForm(incidentId: string, data: any) {
+    const incident = await IncidentRepository.findByIncidentId(incidentId);
+
+    if (!incident) {
+      throw new Error('Incident not found');
+    }
+
+    incident.sreResolution = {
+      resolvedBy: data.resolvedBy,
+      resolutionSummary: data.resolutionSummary,
+      actualRootCause: data.actualRootCause,
+      actionsPerformed: data.actionsPerformed || [],
+      commandsExecuted: data.commandsExecuted || [],
+      preventiveMeasures: data.preventiveMeasures,
+      aiRecommendationUseful: data.aiRecommendationUseful,
+      additionalNotes: data.additionalNotes,
+      resolvedAt: new Date(),
+    };
+
+    incident.status = 'CLOSED';
+
+    await IncidentRepository.save(incident);
+
+    return incident;
+  }
 }
+
+export default new IncidentService();

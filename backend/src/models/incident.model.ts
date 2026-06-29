@@ -32,6 +32,56 @@ const AIAnalysisSchema = new mongoose.Schema(
   },
 );
 
+const SREResolutionSchema = new mongoose.Schema(
+  {
+    resolvedBy: {
+      type: String,
+      default: '',
+    },
+
+    resolutionSummary: {
+      type: String,
+      default: '',
+    },
+
+    actualRootCause: {
+      type: String,
+      default: '',
+    },
+
+    actionsPerformed: {
+      type: [String],
+      default: [],
+    },
+
+    commandsExecuted: {
+      type: [String],
+      default: [],
+    },
+
+    preventiveMeasures: {
+      type: String,
+      default: '',
+    },
+
+    aiRecommendationUseful: {
+      type: String,
+      enum: ['YES', 'NO', 'PARTIAL'],
+      default: 'PARTIAL',
+    },
+
+    additionalNotes: {
+      type: String,
+      default: '',
+    },
+
+    resolvedAt: Date,
+  },
+  {
+    _id: false,
+  },
+);
+
 const IncidentSchema = new mongoose.Schema(
   {
     incidentId: String,
@@ -69,7 +119,13 @@ const IncidentSchema = new mongoose.Schema(
       type: Array,
       default: [],
     },
+
+    sreResolution: {
+      type: SREResolutionSchema,
+      default: null,
+    },
   },
+
   {
     timestamps: true,
   },

@@ -1,18 +1,19 @@
 import { Badge } from "@/components/ui/badge";
 
+interface Props {
+    status: "OPEN" | "CLOSED";
+}
+
 export default function StatusBadge({
     status,
-}: {
-    status: string;
-}) {
-    const variants = {
-        open: "bg-red-500",
-        investigating: "bg-orange-500",
-        resolved: "bg-green-500",
+}: Props) {
+    const styles = {
+        OPEN: "bg-red-500 hover:bg-red-500",
+        CLOSED: "bg-green-500 hover:bg-green-500",
     };
 
     return (
-        <Badge className={variants[status as keyof typeof variants]}>
+        <Badge className={styles[status]}>
             {status}
         </Badge>
     );

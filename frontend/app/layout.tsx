@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import "highlight.js/styles/github-dark.css";
+import SSEProvider from "@/providers/SSEProvider";
+import QueryProvider from "@/providers/QueryProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,7 +32,14 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <DashboardLayout>{children}</DashboardLayout>;
+
+        <QueryProvider >
+          <SSEProvider>
+
+            <DashboardLayout>{children}</DashboardLayout>;
+
+          </SSEProvider>
+        </QueryProvider>
       </body>
     </html>
   );

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { formatDistanceToNow } from "date-fns";
 
 import {
     Table,
@@ -10,87 +11,99 @@ import {
 } from "@/components/ui/table";
 
 import { Button } from "@/components/ui/button";
+
 import SeverityBadge from "./SeverityBadge";
 import StatusBadge from "./StatusBadge";
 
-export const incidents = [
-    {
-        id: "INC-101",
-        service: "checkout-service",
-        severity: "critical",
-        status: "open",
-        confidence: 94,
-        createdAt: "2 mins ago",
-    },
-    {
-        id: "INC-102",
-        service: "payment-service",
-        severity: "warning",
-        status: "investigating",
-        confidence: 88,
-        createdAt: "15 mins ago",
-    },
-    {
-        id: "INC-103",
-        service: "redis",
-        severity: "info",
-        status: "resolved",
-        confidence: 97,
-        createdAt: "1 hour ago",
-    },
-];
-export default function IncidentsTable() {
+import { Incident } from "@/types/incident";
+
+interface IncidentsTableProps {
+    incidents: Incident[];
+}
+
+export default function IncidentsTable({
+    incidents,
+}: IncidentsTableProps) {
     return (
-        <div className="rounded-lg border">
+        <div className="rounded-lg border  overflow-x-auto">
             <Table>
                 <TableHeader>
                     <TableRow>
-                        <TableHead>ID</TableHead>
-                        <TableHead>Service</TableHead>
+                        <TableHead>Incident ID</TableHead>
+                        <TableHead>Source</TableHead>
+                        <TableHead>Resource</TableHead>
                         <TableHead>Severity</TableHead>
                         <TableHead>Status</TableHead>
                         <TableHead>AI Confidence</TableHead>
-                        <TableHead>Created</TableHead>
-                        <TableHead />
+                        <TableHead>Occurred</TableHead>
+                        <TableHead className="text-right">
+                            Actions
+                        </TableHead>
                     </TableRow>
                 </TableHeader>
 
                 <TableBody>
-                    {incidents.map((incident) => (
-                        <TableRow key={incident.id}>
-                            <TableCell>{incident.id}</TableCell>
-
-                            <TableCell>{incident.service}</TableCell>
-
-                            <TableCell>
-                                <SeverityBadge
-                                    severity={incident.severity}
-                                />
-                            </TableCell>
-
-                            <TableCell>
-                                <StatusBadge
-                                    status={incident.status}
-                                />
-                            </TableCell>
-
-                            <TableCell>
-                                {incident.confidence}%
-                            </TableCell>
-
-                            <TableCell>
-                                {incident.createdAt}
-                            </TableCell>
-
-                            <TableCell>
-                                <Link href={`/incidents/${incident.id}`}>
-                                    <Button size="sm">
-                                        View
-                                    </Button>
-                                </Link>
+                    {incidents.length === 0 ? (
+                        <TableRow>
+                            <TableCell
+                                colSpan={8}
+                                className="h-24 text-center"
+                            >
+                                No incidents found
                             </TableCell>
                         </TableRow>
-                    ))}
+                    ) : (
+                        incidents.map((incident) => (
+                            <TableRow key={incident._id}>
+                                <TableCell className="font-medium">
+                                    {incident.incidentId.slice(0, 8)}...
+                                </TableCell>
+
+                                <TableCell>
+                                    {incident.source}
+                                </TableCell>
+
+                                <TableCell>
+                                    {incident.resourceName || "-"}
+                                </TableCell>
+
+                                <TableCell>
+                                    <SeverityBadge
+                                        severity={incident.severity}
+                                    />
+                                </TableCell>
+
+                                <TableCell>
+                                    <StatusBadge
+                                        status={incident.status}
+                                    />
+                                </TableCell>
+
+                                <TableCell>
+                                    {incident.aiAnalysis?.confidence
+                                        ? `${incident.aiAnalysis.confidence}%`
+                                        : "-"}
+                                </TableCell>
+
+                                <TableCell>
+                                    {formatDistanceToNow(
+                                        new Date(incident.occurredAt),
+                                        { addSuffix: true }
+                                    )}
+                                </TableCell>
+
+                                <TableCell className="text-right">
+                                    <Link
+                                        href={`/incidents/${incident.incidentId}`}
+                                    >
+                                        <Button size="sm">
+                                            View
+                                        </Button>
+                                    </Link>
+                                </TableCell>
+                            </TableRow>
+                        ))
+                    )}
                 </TableBody>
             </Table>
         </div>

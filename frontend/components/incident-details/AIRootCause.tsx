@@ -1,22 +1,48 @@
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import {
+    Card,
+    CardContent,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card";
 
-export default function AIRootCause() {
+import { Incident } from "@/types/incident";
+
+interface Props {
+    incident: Incident;
+}
+
+export default function AIRootCause({
+    incident,
+}: Props) {
     return (
         <Card>
             <CardHeader>
-                <h2 className="font-semibold">
+                <CardTitle>
                     AI Root Cause Analysis
-                </h2>
+                </CardTitle>
             </CardHeader>
 
-            <CardContent className="space-y-3">
+            <CardContent className="space-y-4">
                 <p>
-                    Recent deployment introduced an
-                    infinite retry loop.
+                    {incident.aiAnalysis?.rootCause ||
+                        "AI analysis pending"}
                 </p>
 
                 <div>
-                    Confidence: <strong>94%</strong>
+                    Confidence:{" "}
+                    <strong>
+                        {incident.aiAnalysis?.confidence ?? 0}%
+                    </strong>
+                </div>
+
+                <div>
+                    <h4 className="font-semibold">
+                        Explanation
+                    </h4>
+
+                    <p className="text-sm text-muted-foreground">
+                        {incident.aiAnalysis?.explanation}
+                    </p>
                 </div>
             </CardContent>
         </Card>

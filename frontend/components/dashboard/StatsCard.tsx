@@ -1,54 +1,53 @@
-import { Card, CardContent } from "@/components/ui/card";
-import {
-    AlertTriangle,
-    CheckCircle2,
-    Server,
-    Activity,
-} from "lucide-react";
+import { Incident } from "@/types/incident";
 
-const stats = [
-    {
-        title: "Active Incidents",
-        value: "4",
-        icon: AlertTriangle,
-    },
-    {
-        title: "Critical Incidents",
-        value: "1",
-        icon: Activity,
-    },
-    {
-        title: "Healthy Clusters",
-        value: "3/4",
-        icon: CheckCircle2,
-    },
-    {
-        title: "Nodes Running",
-        value: "32",
-        icon: Server,
-    },
-];
+interface Props {
+    incidents: Incident[];
+}
 
-export default function StatsCards() {
+export default function StatsCards({
+    incidents,
+}: Props) {
+    const activeCount = incidents.filter(
+        (i) => i.status === "OPEN"
+    ).length;
+
+    const criticalCount = incidents.filter(
+        (i) => i.severity === "CRITICAL"
+    ).length;
+
+    const resolvedCount = incidents.filter(
+        (i) => i.status === "CLOSED"
+    ).length;
+
     return (
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            {stats.map((stat) => (
-                <Card key={stat.title}>
-                    <CardContent className="flex items-center justify-between p-6">
-                        <div>
-                            <p className="text-muted-foreground text-sm">
-                                {stat.title}
-                            </p>
+        <div className="grid grid-cols-4 gap-4">
+            <div className="rounded-lg border p-6">
+                <h3>Active Incidents</h3>
+                <p className="text-3xl font-bold">
+                    {activeCount}
+                </p>
+            </div>
 
-                            <h3 className="text-3xl font-bold mt-2">
-                                {stat.value}
-                            </h3>
-                        </div>
+            <div className="rounded-lg border p-6">
+                <h3>Critical</h3>
+                <p className="text-3xl font-bold">
+                    {criticalCount}
+                </p>
+            </div>
 
-                        <stat.icon className="h-8 w-8 text-muted-foreground" />
-                    </CardContent>
-                </Card>
-            ))}
+            <div className="rounded-lg border p-6">
+                <h3>Resolved</h3>
+                <p className="text-3xl font-bold">
+                    {resolvedCount}
+                </p>
+            </div>
+
+            <div className="rounded-lg border p-6">
+                <h3>Total</h3>
+                <p className="text-3xl font-bold">
+                    {incidents.length}
+                </p>
+            </div>
         </div>
     );
 }

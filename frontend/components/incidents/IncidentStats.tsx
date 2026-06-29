@@ -1,25 +1,53 @@
 import { Card, CardContent } from "@/components/ui/card";
+import { Incident } from "@/types/incident";
 
-const stats = [
-    {
-        title: "Active",
-        value: 12,
-    },
-    {
-        title: "Critical",
-        value: 3,
-    },
-    {
-        title: "Resolved Today",
-        value: 28,
-    },
-    {
-        title: "Avg Resolution",
-        value: "14m",
-    },
-];
+interface IncidentStatsProps {
+    incidents: Incident[];
+}
 
-export default function IncidentStats() {
+export default function IncidentStats({
+    incidents,
+}: IncidentStatsProps) {
+    const activeIncidents = incidents.filter(
+        (incident) => incident.status === "OPEN"
+    ).length;
+
+    const criticalIncidents = incidents.filter(
+        (incident) => incident.severity === "CRITICAL"
+    ).length;
+
+    const resolvedToday = incidents.filter((incident) => {
+        if (incident.status !== "CLOSED") return false;
+
+        const updatedDate = new Date(incident.updatedAt);
+        const today = new Date();
+
+        return (
+            updatedDate.getDate() === today.getDate() &&
+            updatedDate.getMonth() === today.getMonth() &&
+            updatedDate.getFullYear() === today.getFullYear()
+        );
+    }).length;
+
+    const stats = [
+        {
+            title: "Active Incidents",
+            value: activeIncidents,
+        },
+        {
+            title: "Critical Incidents",
+            value: criticalIncidents,
+        },
+        {
+            title: "Resolved Today",
+            value: resolvedToday,
+        },
+        {
+            title: "Total Incidents",
+            value: incidents.length,
+        },
+    ];
+
     return (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             {stats.map((stat) => (

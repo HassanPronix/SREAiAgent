@@ -1,9 +1,15 @@
 "use client";
 
 import { useState } from "react";
-
+import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+    Card,
+    CardContent,
+    CardHeader,
+    CardTitle,
+    CardDescription,
+} from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import {
     Select,
@@ -13,27 +19,135 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 
-export default function SREResolutionForm() {
+interface Props {
+    incidentId: string;
+}
+
+/*
+Payload to be sent
+{
+  resolvedBy: "John Doe",
+  resolutionSummary: "...",
+  actualRootCause: "...",
+  actionsPerformed: ["Verified logs", "Restarted deployment"],
+  commandsExecuted: ["kubectl get pods"],
+  preventiveMeasures: "...",
+  additionalNotes: "...",
+  aiRecommendationUseful: "YES"
+} 
+  */
+
+export default function SREResolutionForm({
+    incidentId,
+}: Props) {
     const [loading, setLoading] = useState(false);
 
+    const [formData, setFormData] = useState({
+        resolvedBy: "",
+
+        resolutionSummary: "",
+
+        actualRootCause: "",
+
+        actionsPerformed: "",
+
+        commandsExecuted: "",
+
+        preventiveMeasures: "",
+
+        additionalNotes: "",
+
+        aiRecommendationUseful: "PARTIAL",
+    });
+
+    const handleChange = (
+        field: string,
+        value: string
+    ) => {
+        setFormData((prev) => ({
+            ...prev,
+            [field]: value,
+        }));
+    };
+
     const handleSubmit = async () => {
-        setLoading(true);
+        try {
+            setLoading(true);
 
-        // API call later
+            const payload = {
+                resolvedBy: formData.resolvedBy,
 
-        setTimeout(() => {
+                resolutionSummary: formData.resolutionSummary,
+
+                actualRootCause: formData.actualRootCause,
+
+                actionsPerformed: formData.actionsPerformed
+                    .split("\n")
+                    .filter(Boolean),
+
+                commandsExecuted: formData.commandsExecuted
+                    .split("\n")
+                    .filter(Boolean),
+
+                preventiveMeasures: formData.preventiveMeasures,
+
+                additionalNotes: formData.additionalNotes,
+
+                aiRecommendationUseful: formData.aiRecommendationUseful,
+            };
+
+            console.log("Incident:", incidentId);
+
+            console.log(payload);
+
+            /**
+             * Later:
+             *
+            */
+            await incidentsService.resolveIncident(incidentId, payload)
+            
+            setTimeout(() => {
+                setLoading(false);
+
+                alert("Incident resolved successfully");
+            }, 1000);
+        } catch (error) {
+            console.error(error);
             setLoading(false);
-            alert("Incident resolved successfully");
-        }, 1000);
+        }
     };
 
     return (
         <Card>
             <CardHeader>
-                <CardTitle>SRE Resolution Feedback</CardTitle>
+                <CardTitle>
+                    SRE Resolution Feedback
+                </CardTitle>
+
+                <CardDescription>
+                    Capture remediation details to
+                    improve future AI recommendations.
+                </CardDescription>
             </CardHeader>
 
             <CardContent className="space-y-6">
+                <div>
+                    <label className="mb-2 block text-sm font-medium">
+                        Resolved By
+                    </label>
+
+                    <Textarea
+                        rows={1}
+                        placeholder="John Doe"
+                        value={formData.resolvedBy}
+                        onChange={(e) =>
+                            handleChange(
+                                "resolvedBy",
+                                e.target.value
+                            )
+                        }
+                    />
+                </div>
 
                 <div>
                     <label className="mb-2 block text-sm font-medium">
@@ -42,6 +156,15 @@ export default function SREResolutionForm() {
 
                     <Textarea
                         placeholder="Describe how the incident was resolved"
+                        value={
+                            formData.resolutionSummary
+                        }
+                        onChange={(e) =>
+                            handleChange(
+                                "resolutionSummary",
+                                e.target.value
+                            )
+                        }
                     />
                 </div>
 
@@ -52,6 +175,15 @@ export default function SREResolutionForm() {
 
                     <Textarea
                         placeholder="What was the actual root cause?"
+                        value={
+                            formData.actualRootCause
+                        }
+                        onChange={(e) =>
+                            handleChange(
+                                "actualRootCause",
+                                e.target.value
+                            )
+                        }
                     />
                 </div>
 
@@ -61,8 +193,21 @@ export default function SREResolutionForm() {
                     </label>
 
                     <Textarea
-                        placeholder={`1. Scaled replicas\n2. Restarted pods\n3. Rolled back deployment`}
+                        placeholder={`Verified logs\nScaled deployment\nRestarted pods`}
+                        value={
+                            formData.actionsPerformed
+                        }
+                        onChange={(e) =>
+                            handleChange(
+                                "actionsPerformed",
+                                e.target.value
+                            )
+                        }
                     />
+
+                    <p className="mt-1 text-xs text-muted-foreground">
+                        One action per line
+                    </p>
                 </div>
 
                 <div>
@@ -71,8 +216,21 @@ export default function SREResolutionForm() {
                     </label>
 
                     <Textarea
-                        placeholder={`kubectl rollout undo deployment checkout-service`}
+                        placeholder={`kubectl get pods\nkubectl rollout restart deployment app`}
+                        value={
+                            formData.commandsExecuted
+                        }
+                        onChange={(e) =>
+                            handleChange(
+                                "commandsExecuted",
+                                e.target.value
+                            )
+                        }
                     />
+
+                    <p className="mt-1 text-xs text-muted-foreground">
+                        One command per line
+                    </p>
                 </div>
 
                 <div>
@@ -81,24 +239,62 @@ export default function SREResolutionForm() {
                     </label>
 
                     <Textarea
-                        placeholder="How can this incident be prevented?"
+                        placeholder="How can this incident be prevented in future?"
+                        value={
+                            formData.preventiveMeasures
+                        }
+                        onChange={(e) =>
+                            handleChange(
+                                "preventiveMeasures",
+                                e.target.value
+                            )
+                        }
                     />
                 </div>
 
-                <div className="r">
+                <div>
+                    <label className="mb-2 block text-sm font-medium">
+                        Additional Notes
+                    </label>
+
+                    <Textarea
+                        placeholder="Any additional observations"
+                        value={
+                            formData.additionalNotes
+                        }
+                        onChange={(e) =>
+                            handleChange(
+                                "additionalNotes",
+                                e.target.value
+                            )
+                        }
+                    />
+                </div>
+
+                <div>
                     <label className="mb-2 block text-sm font-medium">
                         Was AI Recommendation Useful?
                     </label>
 
-                    <Select>
+                    <Select
+                        defaultValue="PARTIAL"
+                        onValueChange={(value) => handleChange("aiRecommendationUseful", value ?? "PARTIAL")}                    >
                         <SelectTrigger>
-                            <SelectValue placeholder="Select" />
+                            <SelectValue />
                         </SelectTrigger>
 
                         <SelectContent>
-                            <SelectItem value="YES">Yes</SelectItem>
-                            <SelectItem value="PARTIAL">Partially</SelectItem>
-                            <SelectItem value="NO">No</SelectItem>
+                            <SelectItem value="YES">
+                                Yes
+                            </SelectItem>
+
+                            <SelectItem value="PARTIAL">
+                                Partially
+                            </SelectItem>
+
+                            <SelectItem value="NO">
+                                No
+                            </SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
@@ -108,6 +304,10 @@ export default function SREResolutionForm() {
                     className="w-full"
                     disabled={loading}
                 >
+                    {loading && (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    )}
+
                     {loading
                         ? "Resolving Incident..."
                         : "Resolve & Close Incident"}

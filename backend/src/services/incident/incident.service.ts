@@ -4,6 +4,7 @@ import crypto from 'crypto';
 import { SimilarityService } from '../qdrant/similarity.service.js';
 import { RCAService } from '../llm/rca.service.js';
 import IncidentRepository from '../../repositories/IncidentRepository.js';
+import sseService from '../sse/sse.service.js';
 
 class IncidentService {
   static async processEvent(topic: string, payload: any) {
@@ -90,6 +91,8 @@ class IncidentService {
         aiAnalysis: null,
       };
 
+      sseService.broadcast("incident-created", incident);
+
       logger.warn(
         {
           event: 'incident_detected',
@@ -150,6 +153,8 @@ class IncidentService {
         similarIncidents,
       };
 
+      sseService.broadcast("enriched-incident", enrichedIncident);
+
       await incidentModel.create(enrichedIncident);
 
       logger.info(
@@ -188,6 +193,17 @@ class IncidentService {
 
   async getIncident(incidentId: string) {
     const incident = await IncidentRepository.findByIncidentId(incidentId);
+
+    if (!incident) {
+      throw new Error('Incident not found');
+    }
+
+    return incident;
+  }
+
+  async getIncidents() {
+
+    const incident = await IncidentRepository.findAllIncidents();
 
     if (!incident) {
       throw new Error('Incident not found');

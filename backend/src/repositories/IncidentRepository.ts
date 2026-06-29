@@ -5,6 +5,10 @@ class IncidentRepository {
     return IncidentModel.findOne({ incidentId });
   }
 
+  async findAllIncidents() {
+    return IncidentModel.find();
+  }
+
   async save(incident: any) {
     return incident.save();
   }

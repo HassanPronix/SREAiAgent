@@ -25,6 +25,30 @@ class IncidentController {
     }
   }
 
+  async getIncidents(req: Request, res: Response) {
+    try {
+
+      const incidents = await IncidentService.getIncidents();
+
+      return res.status(200).json({
+        success: true,
+        data: incidents,
+      });
+    } catch (error: any) {
+      if (error.message === 'Incident not found') {
+        return res.status(404).json({
+          success: false,
+          message: error.message,
+        });
+      }
+
+      return res.status(500).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  }
+
   async updateSREForm(req: Request, res: Response) {
     try {
       const incident = await IncidentService.updateSREForm(

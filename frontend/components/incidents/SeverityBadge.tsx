@@ -1,18 +1,20 @@
 import { Badge } from "@/components/ui/badge";
 
+interface Props {
+    severity: "INFO" | "WARNING" | "CRITICAL";
+}
+
 export default function SeverityBadge({
     severity,
-}: {
-    severity: string;
-}) {
-    const variants = {
-        critical: "bg-red-500",
-        warning: "bg-yellow-500",
-        info: "bg-blue-500",
+}: Props) {
+    const styles = {
+        CRITICAL: "bg-red-500 hover:bg-red-500",
+        WARNING: "bg-yellow-500 hover:bg-yellow-500",
+        INFO: "bg-blue-500 hover:bg-blue-500",
     };
 
     return (
-        <Badge className={variants[severity as keyof typeof variants]}>
+        <Badge className={styles[severity]}>
             {severity}
         </Badge>
     );

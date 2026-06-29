@@ -1,38 +1,28 @@
-import { Check, X, Sparkles } from "lucide-react";
+import { Check, Sparkles, X } from "lucide-react";
 
 import {
     Card,
     CardContent,
+    CardDescription,
     CardHeader,
     CardTitle,
-    CardDescription,
 } from "@/components/ui/card";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
-const recommendations = [
-    {
-        id: 1,
-        action: "Scale checkout-service replicas from 3 → 5",
-        confidence: 92,
-        impact: "Low",
-    },
-    {
-        id: 2,
-        action: "Rollback deployment v1.2.4",
-        confidence: 89,
-        impact: "Medium",
-    },
-    {
-        id: 3,
-        action: "Increase CPU limits to 1000m",
-        confidence: 85,
-        impact: "Low",
-    },
-];
+import { Incident } from "@/types/incident";
 
-export default function RecommendationsPanel() {
+interface Props {
+    incident: Incident;
+}
+
+export default function RecommendationsPanel({
+    incident,
+}: Props) {
+    const recommendations =
+        incident.aiAnalysis?.remediation || [];
+
     return (
         <Card>
             <CardHeader>
@@ -47,38 +37,43 @@ export default function RecommendationsPanel() {
             </CardHeader>
 
             <CardContent className="space-y-4">
-                {recommendations.map((recommendation) => (
-                    <div
-                        key={recommendation.id}
-                        className="rounded-lg border p-5"
-                    >
-                        <h3 className="font-semibold">
-                            {recommendation.action}
-                        </h3>
-
-                        <div className="mt-4 flex flex-wrap gap-3">
-                            <Badge variant="secondary">
-                                Confidence: {recommendation.confidence}%
-                            </Badge>
-
-                            <Badge variant="outline">
-                                Impact: {recommendation.impact}
-                            </Badge>
-                        </div>
-
-                        <div className="mt-6 flex gap-3">
-                            <Button>
-                                <Check className="mr-2 h-4 w-4" />
-                                Approve
-                            </Button>
-
-                            <Button variant="destructive">
-                                <X className="mr-2 h-4 w-4" />
-                                Reject
-                            </Button>
-                        </div>
+                {recommendations.length === 0 ? (
+                    <div className="rounded-lg border border-dashed p-8 text-center">
+                        <p className="text-muted-foreground">
+                            No AI recommendations available yet.
+                        </p>
                     </div>
-                ))}
+                ) : (
+                    recommendations.map((recommendation, index) => (
+                        <div
+                            key={index}
+                            className="rounded-lg border p-5"
+                        >
+                            <h3 className="font-semibold">
+                                {recommendation}
+                            </h3>
+
+                            <div className="mt-4 flex flex-wrap gap-3">
+                                <Badge variant="secondary">
+                                    Confidence:{" "}
+                                    {incident.aiAnalysis?.confidence ?? 0}%
+                                </Badge>
+                            </div>
+
+                            <div className="mt-6 flex gap-3">
+                                <Button>
+                                    <Check className="mr-2 h-4 w-4" />
+                                    Approve
+                                </Button>
+
+                                <Button variant="destructive">
+                                    <X className="mr-2 h-4 w-4" />
+                                    Reject
+                                </Button>
+                            </div>
+                        </div>
+                    ))
+                )}
             </CardContent>
         </Card>
     );

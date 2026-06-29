@@ -1,26 +1,30 @@
 import { Badge } from "@/components/ui/badge";
+import { Incident } from "@/types/incident";
 
-export default function IncidentHeader() {
+interface Props {
+    incident: Incident;
+}
+
+export default function IncidentHeader({
+    incident,
+}: Props) {
     return (
         <div className="rounded-xl border p-6">
-            <div className="flex justify-between">
+            <div className="flex items-start justify-between">
                 <div>
                     <h1 className="text-3xl font-bold">
-                        INC-101
+                        {incident.title}
                     </h1>
 
-                    <p className="text-muted-foreground mt-2">
-                        High CPU Usage in checkout-service
+                    <p className="mt-2 text-muted-foreground">
+                        {incident.incidentId}
                     </p>
                 </div>
 
                 <div className="flex gap-2">
-                    <Badge variant="destructive">
-                        Critical
-                    </Badge>
-
-                    <Badge>
-                        Investigating
+                    <Badge>{incident.severity}</Badge>
+                    <Badge variant="outline">
+                        {incident.status}
                     </Badge>
                 </div>
             </div>

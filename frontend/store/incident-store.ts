@@ -11,6 +11,8 @@ interface IncidentStore {
     updateIncident: (incident: Incident) => void;
 
     getIncident: (id: string) => Incident | undefined;
+
+    updateIncidentStatus: (incidentId: string, status: Incident["status"]) => void;
 }
 
 export const useIncidentStore =
@@ -44,4 +46,13 @@ export const useIncidentStore =
             get().incidents.find(
                 (i) => i.incidentId === id
             ),
+
+        updateIncidentStatus: (incidentId, status) =>
+            set((state) => ({
+                incidents: state.incidents.map((i) =>
+                    i.incidentId === incidentId
+                        ? { ...i, status }
+                        : i
+                ),
+            })),
     }));

@@ -19,6 +19,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import incidentService from "@/services/incident.service";
+import { useIncidentStore } from "@/store/incident-store";
 
 interface Props {
     incidentId: string;
@@ -83,7 +84,7 @@ export default function SREResolutionForm({
                 actualRootCause: formData.actualRootCause,
 
                 actionsPerformed: formData.actionsPerformed
-                    .split("\n")
+                    .split("\,")
                     .filter(Boolean),
 
                 commandsExecuted: formData.commandsExecuted
@@ -101,17 +102,17 @@ export default function SREResolutionForm({
 
             console.log(payload);
 
-            /**
-             * make an API call
-             *
-            */
             await incidentService.resolveIncident(incidentId, payload)
-            
+
+            // update the status to CLOSED
+            useIncidentStore.getState().updateIncidentStatus(incidentId, "CLOSED");
+
             setTimeout(() => {
                 setLoading(false);
 
                 alert("Incident resolved successfully");
             }, 1000);
+
         } catch (error) {
             console.error(error);
             setLoading(false);
@@ -194,7 +195,7 @@ export default function SREResolutionForm({
                     </label>
 
                     <Textarea
-                        placeholder={`Verified logs\nScaled deployment\nRestarted pods`}
+                        placeholder={`Verified logs, Scaled deployment, Restarted pods`}
                         value={
                             formData.actionsPerformed
                         }

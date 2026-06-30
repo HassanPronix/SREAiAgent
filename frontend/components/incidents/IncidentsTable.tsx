@@ -25,7 +25,7 @@ export default function IncidentsTable({
     incidents,
 }: IncidentsTableProps) {
     return (
-        <div className="rounded-lg border  overflow-x-auto">
+        <div className="rounded-lg border overflow-x-auto">
             <Table>
                 <TableHeader>
                     <TableRow>

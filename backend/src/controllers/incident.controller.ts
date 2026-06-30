@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import IncidentService from '../services/incident/incident.service.js';
+import { SimilarityService } from '../services/qdrant/similarity.service.js';
 
 class IncidentController {
   async getIncident(req: Request, res: Response) {
@@ -25,7 +26,7 @@ class IncidentController {
     }
   }
 
-  async getIncidents(req: Request, res: Response) {
+  async getIncidents(_: Request, res: Response) {
     try {
 
       const incidents = await IncidentService.getIncidents();
@@ -50,11 +51,22 @@ class IncidentController {
   }
 
   async updateSREForm(req: Request, res: Response) {
+
     try {
-      const incident = await IncidentService.updateSREForm(
-        req.params.incidentId as string,
-        req.body,
-      );
+      const incidentId = req.params.incidentId as string;
+
+      const incident = await IncidentService.updateSREForm(incidentId, req.body,);
+
+      // Trigger async learning pipeline (non-blocking)
+      if (incident?.sreResolution) {
+        setImmediate(async () => {
+          try {
+            await SimilarityService.indexIncidentResolution(incident);
+          } catch (err) {
+            console.error('Qdrant indexing failed:', err);
+          }
+        });
+      }
 
       return res.status(200).json({
         success: true,
@@ -71,7 +83,7 @@ class IncidentController {
 
       return res.status(500).json({
         success: false,
-        message: error.message,
+        message: error.message || 'Internal Server Error',
       });
     }
   }

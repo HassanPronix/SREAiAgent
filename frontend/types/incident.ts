@@ -1,9 +1,28 @@
 export interface AIAnalysis {
     summary: string;
     rootCause: string;
+
     remediation: string[];
+
     confidence: number;
+
     explanation: string;
+
+    commands: string[];
+
+    kubernetesYaml?: string;
+
+    riskLevel?: 'LOW' | 'MEDIUM' | 'HIGH';
+
+    approvalStatus?: 'PENDING' | 'APPROVED' | 'REJECTED';
+
+    approvedCommands?: string[];
+
+    approvedYaml?: string;
+
+    approvedBy?: string;
+
+    approvedAt?: string;
 }
 
 export interface SREResolution {

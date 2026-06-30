@@ -21,8 +21,7 @@ interface Props {
 export default function SimilarIncidents({
     incident,
 }: Props) {
-    const similarIncidents =
-        incident.similarIncidents || [];
+    const similarIncidents = incident.similarIncidents || [];
 
     return (
         <Card>

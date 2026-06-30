@@ -23,7 +23,7 @@ const links = [
     },
     {
         name: "AI Chat",
-        href: "/chat",
+        href: "/chats",
         icon: Bot,
     },
     {

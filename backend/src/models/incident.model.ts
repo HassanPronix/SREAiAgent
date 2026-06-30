@@ -17,6 +17,16 @@ const AIAnalysisSchema = new mongoose.Schema(
       default: [],
     },
 
+    commands: {
+      type: [String],
+      default: [],
+    },
+
+    kubernetesYaml: {
+      type: String,
+      default: '',
+    },
+
     confidence: {
       type: Number,
       default: 0,
@@ -26,10 +36,42 @@ const AIAnalysisSchema = new mongoose.Schema(
       type: String,
       default: '',
     },
+
+    riskLevel: {
+      type: String,
+      enum: ['LOW', 'MEDIUM', 'HIGH'],
+      default: 'MEDIUM',
+    },
+
+    approvalStatus: {
+      type: String,
+      enum: ['PENDING', 'APPROVED', 'REJECTED'],
+      default: 'PENDING',
+    },
+
+    // 🧠 NEW: Human-in-the-loop execution
+    approvedCommands: {
+      type: [String],
+      default: [],
+    },
+
+    approvedYaml: {
+      type: String,
+      default: '',
+    },
+
+    approvedBy: {
+      type: String,
+      default: '',
+    },
+
+    approvedAt: {
+      type: Date,
+    },
   },
   {
     _id: false,
-  },
+  }
 );
 
 const SREResolutionSchema = new mongoose.Schema(

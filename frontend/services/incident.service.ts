@@ -26,11 +26,10 @@ class IncidentsService {
         id: string,
         payload: any
     ): Promise<Incident> {
-        const response =
-            await api.post<SingleIncidentResponse>(
-                `/incidents/${id}/resolve`,
-                payload
-            );
+        const response = await api.put<SingleIncidentResponse>(
+            `/incidents/${id}/sre-resolution`,
+            payload
+        );
 
         return response.data.data;
     }

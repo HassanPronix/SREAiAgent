@@ -14,7 +14,7 @@ export async function startMetricConsumer() {
   await consumer.subscribe([TOPICS.METRICS]);
 
   await consumer.run(async (_, message) => {
-    // console.log('metric -->', message)
+
     const payload = JSON.parse(message);
 
     const normalizedMetrics = normalizePrometheusMetric(payload.metricName, payload.data);

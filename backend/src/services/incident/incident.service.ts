@@ -7,7 +7,8 @@ import IncidentRepository from '../../repositories/IncidentRepository.js';
 import sseService from '../sse/sse.service.js';
 
 class IncidentService {
-  static async processEvent(topic: string, payload: any) {
+  
+  async processEvent(topic: string, payload: any) {
     try {
       let isIncident = true;
 

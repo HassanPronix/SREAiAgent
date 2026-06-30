@@ -8,11 +8,12 @@ const router = express.Router();
 
 router.get('/', incidentController.getIncidents)
 
+router.get("/events", sseController.connect);
+
 router.get('/:incidentId', incidentController.getIncident);
 
 // Update SRE Resolution & Close Incident
 router.put('/:incidentId/sre-resolution', incidentController.updateSREForm);
 
-router.get("/events", sseController.connect);
 
 export default router;

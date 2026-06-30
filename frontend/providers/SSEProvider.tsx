@@ -11,11 +11,9 @@ export default function SSEProvider({
 }: {
     children: React.ReactNode;
 }) {
-    const addIncident =
-        useIncidentStore((state) => state.addIncident);
+    const addIncident = useIncidentStore((state) => state.addIncident);
 
-    const updateIncident =
-        useIncidentStore((state) => state.updateIncident);
+    const updateIncident = useIncidentStore((state) => state.updateIncident);
 
     useEffect(() => {
         const eventSource = sseService.connect();
@@ -27,6 +25,7 @@ export default function SSEProvider({
                     event.data
                 );
 
+                console.log('incident created --> ', incident)
                 addIncident(incident);
             }
         );
@@ -37,7 +36,7 @@ export default function SSEProvider({
                 const incident: Incident = JSON.parse(
                     event.data
                 );
-
+                console.log('enrichedIncident --> ', incident)
                 updateIncident(incident);
             }
         );

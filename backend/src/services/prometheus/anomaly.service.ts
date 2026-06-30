@@ -1,36 +1,45 @@
 import { MetricEvent } from '../../interfaces/metric.interface.js';
 
+type AnomalyRule = {
+  threshold: number;
+  severity: 'INFO' | 'WARN' | 'ERROR' | 'CRITICAL';
+};
+
+const RULES: Record<string, AnomalyRule> = {
+  cpu_usage: {
+    threshold: 0.8,
+    severity: 'CRITICAL',
+  },
+  memory_usage: {
+    threshold: 0.85,
+    severity: 'CRITICAL',
+  },
+  pod_restarts: {
+    threshold: 3,
+    severity: 'WARN',
+  },
+};
+
 export function detectAnomaly(metric: MetricEvent): MetricEvent | null {
-  switch (metric.metricName) {
-    case 'cpu_usage':
-      if (metric.value > 0.8) {
-        return {
-          ...metric,
-          severity: 'CRITICAL',
-        };
-      }
-      break;
+  const rule = RULES[metric.metricName];
 
-    case 'memory_usage':
-      if (metric.value > 0.85) {
-        return {
-          ...metric,
-          severity: 'CRITICAL',
-        };
-      }
-      break;
+  // No rule defined for this metric
+  if (!rule) {
+    return null;
+  }
 
-    case 'pod_restarts':
-      if (metric.value > 3) {
-        return {
-          ...metric,
-          severity: 'WARN',
-        };
-      }
-      break;
+  // Ensure value is valid number
+  const value = Number(metric.value);
 
-    default:
-      return null;
+  if (Number.isNaN(value)) {
+    return null;
+  }
+
+  if (value > rule.threshold) {
+    return {
+      ...metric,
+      severity: rule.severity,
+    };
   }
 
   return null;

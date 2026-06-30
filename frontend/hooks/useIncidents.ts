@@ -3,6 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import incidentsService from "@/services/incident.service";
 import { useIncidentStore } from "@/store/incident-store";
+import { useEffect } from "react";
 
 export function useIncidents() {
     const incidents = useIncidentStore(
@@ -18,9 +19,11 @@ export function useIncidents() {
         queryFn: incidentsService.getAll,
     });
 
-    if (query.data && incidents.length === 0) {
-        setIncidents(query.data);
-    }
+    useEffect(() => {
+        if (query.data && incidents.length === 0) {
+            setIncidents(query.data);
+        }
+    }, [query.data, incidents.length, setIncidents]);
 
     return {
         incidents,

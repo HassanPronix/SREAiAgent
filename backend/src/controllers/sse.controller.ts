@@ -16,11 +16,17 @@ class SSEController {
 
         SSEService.addClient(clientId, res);
 
-        res.write(`event: connected\n`);
+        res.write(`event: connected\ndata: ${JSON.stringify({ clientId })}\n\n`);
         res.write(`data: ${JSON.stringify({ clientId })}\n\n`);
 
+        const heartbeat = setInterval(() => {
+            res.write(": ping\n\n");
+        }, 25000);
+
         req.on("close", () => {
+            clearInterval(heartbeat);
             SSEService.removeClient(clientId);
+            res.end();
         });
     }
 

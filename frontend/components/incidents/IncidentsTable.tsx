@@ -54,7 +54,7 @@ export default function IncidentsTable({
                         </TableRow>
                     ) : (
                         incidents.map((incident) => (
-                            <TableRow key={incident._id}>
+                            <TableRow key={incident.incidentId}>
                                 <TableCell className="font-medium">
                                     {incident.incidentId.slice(0, 8)}...
                                 </TableCell>

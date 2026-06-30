@@ -18,6 +18,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import incidentService from "@/services/incident.service";
 
 interface Props {
     incidentId: string;
@@ -101,10 +102,10 @@ export default function SREResolutionForm({
             console.log(payload);
 
             /**
-             * Later:
+             * make an API call
              *
             */
-            await incidentsService.resolveIncident(incidentId, payload)
+            await incidentService.resolveIncident(incidentId, payload)
             
             setTimeout(() => {
                 setLoading(false);

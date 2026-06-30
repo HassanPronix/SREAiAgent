@@ -21,6 +21,8 @@ class SSEService {
     }
 
     broadcast(event: string, data: any) {
+
+        console.log(data)
         for (const client of this.clients.values()) {
             client.write(`event: ${event}\n`);
             client.write(`data: ${JSON.stringify(data)}\n\n`);

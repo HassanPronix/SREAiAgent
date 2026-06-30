@@ -18,7 +18,13 @@ export const useIncidentStore =
         incidents: [],
 
         setIncidents: (incidents) =>
-            set({ incidents }),
+            set({
+                incidents: [...incidents].sort(
+                    (a, b) =>
+                        new Date(b.occurredAt).getTime() -
+                        new Date(a.occurredAt).getTime()
+                ),
+            }),
 
         addIncident: (incident) =>
             set((state) => ({

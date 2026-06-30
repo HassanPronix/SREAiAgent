@@ -5,7 +5,7 @@ class SSEService {
         if (this.eventSource) return this.eventSource;
 
         this.eventSource = new EventSource(
-            `${process.env.NEXT_PUBLIC_API_URL}/events`
+            `${process.env.NEXT_PUBLIC_API_URL}/incidents/events`
         );
 
         this.eventSource.onopen = () => {

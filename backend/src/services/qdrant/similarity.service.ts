@@ -1,3 +1,4 @@
+import { getChatVectorStore } from './chat-vector-store.service.js';
 import { getVectorStore } from './vector-store.service.js';
 
 export class SimilarityService {

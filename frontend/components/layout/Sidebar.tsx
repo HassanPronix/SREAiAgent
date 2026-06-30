@@ -26,11 +26,11 @@ const links = [
         href: "/chats",
         icon: Bot,
     },
-    {
-        name: "Recommendations",
-        href: "/recommendations",
-        icon: Lightbulb,
-    },
+    // {
+    //     name: "Recommendations",
+    //     href: "/recommendations",
+    //     icon: Lightbulb,
+    // },
     {
         name: "Clusters",
         href: "/clusters",
@@ -47,7 +47,7 @@ export default function Sidebar() {
     return (
         <aside className="w-64 border-r border-slate-800 bg-slate-900 p-4">
             <h1 className="text-xl font-bold text-white mb-8">
-                AI Ops
+                DevOps AI Agent
             </h1>
 
             <nav className="space-y-2">

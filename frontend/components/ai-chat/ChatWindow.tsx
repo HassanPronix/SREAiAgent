@@ -50,7 +50,7 @@ export function ChatWindow({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 30, scale: 0.98 }}
             transition={{ duration: 0.2 }}
-            className="fixed bottom-24 right-6 z-50 flex h-[605px] w-[420px] flex-col overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 shadow-2xl"
+            className="fixed bottom-24 right-6 z-50 flex h-151.25 w-105 flex-col overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 shadow-2xl"
         >
             {/* Header */}
 

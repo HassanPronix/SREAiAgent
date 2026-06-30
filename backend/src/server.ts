@@ -23,17 +23,17 @@ async function bootstrap() {
   try {
     await Promise.all([
       connectDB(),
-      producerService.connect(),
+      // producerService.connect(),
       initializeVectorStore()
     ]);
 
     // connect all kafka consumers
     await Promise.all([
-      startIncidentConsumer(),
+      // startIncidentConsumer(),
 
-      startBackendLogConsumer(),
-      startRawLogConsumer(),
-      startMetricConsumer(),
+      // startBackendLogConsumer(),
+      // startRawLogConsumer(),
+      // startMetricConsumer(),
 
     //   // for k8s
     //   startObservabilityConsumer(TOPICS.K8S_EVENTS, "k8s-event-group"),
@@ -42,7 +42,7 @@ async function bootstrap() {
     //   startObservabilityConsumer(TOPICS.NODE_EVENTS, "node-event-group"),
     ]);
 
-    startMetricsCollector();
+    // startMetricsCollector();
     // Enable Kubernetes watchers when required
     // startWatchers();
 

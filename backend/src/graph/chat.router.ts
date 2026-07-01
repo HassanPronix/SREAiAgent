@@ -7,22 +7,22 @@ export function routeFromIntent(
     const routes: string[] = [];
 
     if (state.intent?.requiresMemory) {
-        routes.push("memory");
+        routes.push("memoryAgent");
     }
 
     if (state.intent?.requiresIncidentSearch) {
-        routes.push("incident");
+        routes.push("incidentAgent");
     }
 
     if (
         state.intent?.requiresDatabase &&
         state.intent.query.operation !== "NONE"
     ) {
-        routes.push("database");
+        routes.push("databaseAgent");
     }
 
     if (routes.length === 0) {
-        routes.push("response");
+        routes.push("responseAgent");
     }
 
     console.log('routes --> ', routes)

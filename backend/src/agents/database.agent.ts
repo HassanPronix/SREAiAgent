@@ -23,8 +23,6 @@ export async function DatabaseAgent(
         state.intent.query
     );
 
-    console.log('DB result --> ', { result, query: state.intent.query })
-
     return {
         databaseResult: result,
         databaseContext: buildDatabaseContext(result)

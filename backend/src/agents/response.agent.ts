@@ -26,7 +26,5 @@ export async function ResponseAgent(
     return {
 
         answer: response.content
-
     };
-
 }
